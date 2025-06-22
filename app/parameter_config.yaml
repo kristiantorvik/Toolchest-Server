@@ -1,0 +1,36 @@
+tool_parameters:
+  - name: diameter
+    type: float
+    description: "Tool diameter in mm"
+  - name: number_of_flutes
+    type: int
+    description: "Number of flutes on tool"
+  - name: tool_designation
+    type: string
+    description: "Designation code for tool"
+
+recipe_parameters:
+  - name: cutting_speed
+    type: float
+    description: "Surface speed in m/min"
+  - name: feedrate_fu
+    type: float
+    description: "Feed rate in mm/rev"
+  - name: cut_depth
+    type: float
+    description: "Depth of cut in mm"
+  - name: cut_width
+    type: float
+    description: "Width of cut in mm"
+  - name: pecking_depth
+    type: float
+    description: "Pecking depth for drilling"
+  - name: lifetime
+    type: int
+    description: "Tool lifetime in parts"
+  - name: coolant
+    type: string
+    description: "Coolant type"
+  - name: airblast
+    type: string
+    description: "Airblast status"

@@ -7,5 +7,7 @@ def fetch(endpoint):
     return response.json() if response.status_code == 200 else []
 
 def post(endpoint, data):
-    response = requests.post(f"{API_URL}/{endpoint}", json=data)
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post(f"{API_URL}/{endpoint}", json=data, headers=headers)
     return response
+

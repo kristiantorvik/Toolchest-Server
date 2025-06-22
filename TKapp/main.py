@@ -5,7 +5,7 @@ class ToolChestApp:
     def __init__(self, root):
         self.root = root
         self.root.title("ToolChest Server")
-        self.root.geometry("700x600")
+        self.root.geometry("500x500")
         self.create_layout()
         self.show_home()
 

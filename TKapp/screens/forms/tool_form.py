@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
 from api import fetch, post
 
 def show_tool_form(app):
@@ -7,46 +6,82 @@ def show_tool_form(app):
     app.clear_content()
 
     tooltypes = fetch("tool_types/")
-    tooltype_map = {t["type_name"]: t["id"] for t in tooltypes}
+    tooltype_map = {t["type_name"]: t for t in tooltypes}
+    tooltype_keys = list(tooltype_map.keys())
 
-    tk.Label(app.content_frame, text="Name:").grid(row=0, column=0)
-    name_entry = tk.Entry(app.content_frame)
-    name_entry.grid(row=0, column=1)
+    dynamic_fields = {}
 
-    tk.Label(app.content_frame, text="Tool Type:").grid(row=1, column=0)
-    combo_tooltype = ttk.Combobox(app.content_frame, values=list(tooltype_map.keys()))
-    combo_tooltype.grid(row=1, column=1)
+    def update_after_tooltype(*args):
+        selected_tooltype = tooltype_var.get()
+        if not selected_tooltype:
+            return
+        tooltype_id = tooltype_map[selected_tooltype]["id"]
 
-    tk.Label(app.content_frame, text="Diameter:").grid(row=2, column=0)
-    diameter_entry = tk.Entry(app.content_frame)
-    diameter_entry.grid(row=2, column=1)
+        for widget in dynamic_fields.values():
+            widget["label"].destroy()
+            widget["entry"].destroy()
+        dynamic_fields.clear()
 
-    tk.Label(app.content_frame, text="# Flutes:").grid(row=3, column=0)
-    flutes_entry = tk.Entry(app.content_frame)
-    flutes_entry.grid(row=3, column=1)
+        parameters = fetch(f"tooltype_parameters/{tooltype_id}")
+        print("DEBUG: Fetched parameters:", parameters)  # <-- You can add this print to verify!
 
-    tk.Label(app.content_frame, text="Designation:").grid(row=4, column=0)
-    designation_entry = tk.Entry(app.content_frame)
-    designation_entry.grid(row=4, column=1)
+        for idx, param in enumerate(parameters):
+            pname = param["name"]
+            ptype = param["type"]
+            label = tk.Label(app.content_frame, text=f"{pname} ({ptype}):")
+            label.grid(row=2+idx, column=0)
+            entry = tk.Entry(app.content_frame)
+            entry.grid(row=2+idx, column=1)
+            dynamic_fields[pname] = {"label": label, "entry": entry, "type": ptype}
 
-    tk.Label(app.content_frame, text="Description:").grid(row=5, column=0)
-    desc_entry = tk.Entry(app.content_frame)
-    desc_entry.grid(row=5, column=1)
+
+    import json
 
     def submit():
         data = {
             "name": name_entry.get(),
-            "tool_type_id": tooltype_map[combo_tooltype.get()],
-            "diameter": float(diameter_entry.get()),
-            "number_of_flutes": int(flutes_entry.get()),
-            "tool_designation": designation_entry.get(),
-            "description": desc_entry.get()
+            "tool_type_id": tooltype_map[tooltype_var.get()]["id"],
+            "parameters": {}
         }
+        for pname, field in dynamic_fields.items():
+            val = field["entry"].get()
+            ptype = field["type"]
+            if ptype == "int":
+                val = int(val)
+            elif ptype == "float":
+                val = float(val)
+            data["parameters"][pname] = val
+
+        # DEBUG: print exactly what is being sent
+        print("DEBUG - Sending data to server:")
+        print(json.dumps(data, indent=2))
+
         response = post("tools/", data)
         if response.status_code == 200:
-            messagebox.showinfo("Success", "Tool Added!")
+            app.set_status("Tool Added!")
             app.show_home()
         else:
-            messagebox.showerror("Error", f"Error {response.status_code}")
+            app.set_status(f"Error {response.status_code}")
 
-    tk.Button(app.content_frame, text="Submit", command=submit).grid(row=6, column=0, columnspan=2, pady=10)
+
+    # GUI elements after defining functions
+    tk.Label(app.content_frame, text="Tool Name:").grid(row=0, column=0)
+    name_entry = tk.Entry(app.content_frame)
+    name_entry.grid(row=0, column=1)
+
+    tk.Label(app.content_frame, text="Tool Type:").grid(row=1, column=0)
+
+    tooltype_var = tk.StringVar()
+    if tooltype_keys:
+        tooltype_var.set(tooltype_keys[0])
+
+    tooltype_menu = tk.OptionMenu(app.content_frame, tooltype_var, *tooltype_keys)
+    tooltype_menu.grid(row=1, column=1)
+
+    tooltype_var.trace("w", update_after_tooltype)
+
+    # Manually trigger once after full setup
+    if tooltype_keys:
+        update_after_tooltype()
+
+    tk.Button(app.content_frame, text="Submit", command=submit).grid(row=100, column=0, columnspan=2, pady=20)

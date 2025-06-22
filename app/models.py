@@ -2,6 +2,29 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, Tabl
 from sqlalchemy.orm import relationship
 from .db import Base
 
+
+class ToolParameter(Base):
+    __tablename__ = "tool_parameters"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+    type = Column(String)
+    description = Column(String)
+
+class RecipeParameter(Base):
+    __tablename__ = "recipe_parameters"
+    id = Column(Integer, primary_key=True)
+    name = Column(String, unique=True)
+    type = Column(String)
+    description = Column(String)
+
+
+tooltype_toolparameter_link = Table(
+    "tooltype_toolparameter_link",
+    Base.metadata,
+    Column("tooltype_id", Integer, ForeignKey("tool_types.id"), primary_key=True),
+    Column("tool_parameter_id", Integer, ForeignKey("tool_parameters.id"), primary_key=True)
+)
+
 tooltype_strategy_link = Table(
     "tooltype_strategy_link",
     Base.metadata,
@@ -9,19 +32,25 @@ tooltype_strategy_link = Table(
     Column("strategy_id", Integer, ForeignKey("strategies.id"), primary_key=True)
 )
 
-tooltype_parameter_link = Table(
-    "tooltype_parameter_link",
-    Base.metadata,
-    Column("tooltype_id", Integer, ForeignKey("tool_types.id"), primary_key=True),
-    Column("parameter_name", String, primary_key=True)
-)
+class StrategyRecipeParameterLink(Base):
+    __tablename__ = "strategy_recipeparameter_link"
+    id = Column(Integer, primary_key=True)
+    strategy_id = Column(Integer, ForeignKey("strategies.id"))
+    parameter_id = Column(Integer, ForeignKey("recipe_parameters.id"))
 
-strategy_parameter_link = Table(
-    "strategy_parameter_link",
-    Base.metadata,
-    Column("strategy_id", Integer, ForeignKey("strategies.id"), primary_key=True),
-    Column("parameter_name", String, primary_key=True)
-)
+    strategy = relationship("Strategy", back_populates="recipe_parameter_links")
+    parameter = relationship("RecipeParameter")
+
+
+
+class ToolParameterValue(Base):
+    __tablename__ = "tool_parameter_values"
+    id = Column(Integer, primary_key=True)
+    tool_id = Column(Integer, ForeignKey("tools.id"))
+    parameter_id = Column(Integer, ForeignKey("tool_parameters.id"))
+    value_float = Column(Float, nullable=True)
+    value_int = Column(Integer, nullable=True)
+    value_str = Column(String, nullable=True)
 
 
 class Material(Base):
@@ -32,24 +61,24 @@ class Material(Base):
 
 class Strategy(Base):
     __tablename__ = "strategies"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String, unique=True)
     description = Column(String)
-    tool_types = relationship(
-        "ToolType",
-        secondary=tooltype_strategy_link,
-        back_populates="strategies"
-    )
+
+    tool_types = relationship("ToolType", secondary=tooltype_strategy_link, back_populates="strategies")
+
+    recipe_parameter_links = relationship("StrategyRecipeParameterLink", back_populates="strategy")
+    recipe_parameters = relationship("RecipeParameter", secondary="strategy_recipeparameter_link", viewonly=True)
+
+
 
 class ToolType(Base):
     __tablename__ = "tool_types"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True)
     type_name = Column(String, unique=True)
-    strategies = relationship(
-        "Strategy",
-        secondary=tooltype_strategy_link,
-        back_populates="tool_types"
-    )
+    strategies = relationship("Strategy", secondary=tooltype_strategy_link, back_populates="tool_types")
+    tool_parameters = relationship("ToolParameter", secondary=tooltype_toolparameter_link)
+
 
 class Tool(Base):
     __tablename__ = "tools"

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional,List, Dict, Union
 
 class MaterialCreate(BaseModel):
     name: str
@@ -12,6 +12,8 @@ class MaterialRead(MaterialCreate):
 class StrategyCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    recipe_parameter_ids: list[int] = []
+
 class StrategyRead(StrategyCreate):
     id: int
     class Config:
@@ -19,22 +21,37 @@ class StrategyRead(StrategyCreate):
 
 class ToolTypeCreate(BaseModel):
     type_name: str
+    strategy_ids: list[int] = []
+    tool_parameter_ids: list[int] = []
+
+
+
 class ToolTypeRead(ToolTypeCreate):
     id: int
     class Config:
         from_attributes = True
 
+
+from pydantic import BaseModel
+from typing import List, Dict, Union
+
+class ToolParameterValueCreate(BaseModel):
+    parameter_id: int
+    value: float
+
 class ToolCreate(BaseModel):
     name: str
     tool_type_id: int
-    diameter: float
-    number_of_flutes: int
-    tool_designation: Optional[str] = None
-    description: Optional[str] = None
-class ToolRead(ToolCreate):
+    parameters: Dict[str, Union[int, float, str]]
+
+class ToolRead(BaseModel):
     id: int
+    name: str
+    tool_type_id: int
+    parameters: Dict[str, Union[int, float, str]]
+    
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class RecipeCreate(BaseModel):
     tool_id: int
@@ -51,3 +68,20 @@ class RecipeRead(RecipeCreate):
     id: int
     class Config:
         from_attributes = True
+
+
+
+
+class RecipeParameterBase(BaseModel):
+    name: str
+    type: str
+    description: str
+
+class RecipeParameterCreate(RecipeParameterBase):
+    pass
+
+class RecipeParameterRead(RecipeParameterBase):
+    id: int
+
+    class Config:
+        from_attributes = True  # for Pydantic V2
