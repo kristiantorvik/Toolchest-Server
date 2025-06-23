@@ -72,11 +72,11 @@ def show_tool_form(app):
     tk.Label(app.content_frame, text="Tool Type:").grid(row=1, column=0)
 
     tooltype_var = tk.StringVar()
-    if tooltype_keys:
-        tooltype_var.set(tooltype_keys[0])
-
-    tooltype_menu = tk.OptionMenu(app.content_frame, tooltype_var, *tooltype_keys)
+    tooltype_keys = list(tooltype_map.keys())
+    tooltype_var.set(tooltype_keys[0] if tooltype_keys else '')
+    tooltype_menu = tk.OptionMenu(app.content_frame, tooltype_var, tooltype_var.get(), *tooltype_keys)
     tooltype_menu.grid(row=1, column=1)
+
 
     tooltype_var.trace("w", update_after_tooltype)
 

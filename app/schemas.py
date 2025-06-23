@@ -1,17 +1,53 @@
 from pydantic import BaseModel
-from typing import Optional,List, Dict, Union
+from typing import Optional, Dict
 
+# MATERIALS
 class MaterialCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: Optional[str] = ""
+
 class MaterialRead(MaterialCreate):
     id: int
     class Config:
         from_attributes = True
 
+# TOOL PARAMETERS
+class ToolParameterCreate(BaseModel):
+    name: str
+    type: str
+    description: Optional[str] = ""
+
+class ToolParameterRead(ToolParameterCreate):
+    id: int
+    class Config:
+        from_attributes = True
+
+# RECIPE PARAMETERS
+class RecipeParameterCreate(BaseModel):
+    name: str
+    type: str
+    description: Optional[str] = ""
+
+class RecipeParameterRead(RecipeParameterCreate):
+    id: int
+    class Config:
+        from_attributes = True
+
+# TOOL TYPES
+class ToolTypeCreate(BaseModel):
+    type_name: str
+    tool_parameter_ids: list[int] = []
+    strategy_ids: list[int] = []
+
+class ToolTypeRead(ToolTypeCreate):
+    id: int
+    class Config:
+        from_attributes = True
+
+# STRATEGIES
 class StrategyCreate(BaseModel):
     name: str
-    description: Optional[str] = None
+    description: Optional[str] = ""
     recipe_parameter_ids: list[int] = []
 
 class StrategyRead(StrategyCreate):
@@ -19,69 +55,21 @@ class StrategyRead(StrategyCreate):
     class Config:
         from_attributes = True
 
-class ToolTypeCreate(BaseModel):
-    type_name: str
-    strategy_ids: list[int] = []
-    tool_parameter_ids: list[int] = []
-
-
-
-class ToolTypeRead(ToolTypeCreate):
-    id: int
-    class Config:
-        from_attributes = True
-
-
-from pydantic import BaseModel
-from typing import List, Dict, Union
-
-class ToolParameterValueCreate(BaseModel):
-    parameter_id: int
-    value: float
-
+# TOOLS
 class ToolCreate(BaseModel):
     name: str
     tool_type_id: int
-    parameters: Dict[str, Union[int, float, str]]
+    parameters: Dict[str, str | int | float]
 
-class ToolRead(BaseModel):
+class ToolRead(ToolCreate):
     id: int
-    name: str
-    tool_type_id: int
-    parameters: Dict[str, Union[int, float, str]]
-    
-    class Config:
-        orm_mode = True
 
+# RECIPES
 class RecipeCreate(BaseModel):
-    tool_id: int
     material_id: int
     strategy_id: int
-    cutting_speed: float
-    feedrate_fu: float
-    cut_depth: float
-    cut_width: float
-    lifetime: int
-    coolant: bool
-    airblast: bool
+    tool_id: int
+    parameters: Dict[str, str | int | float]
+
 class RecipeRead(RecipeCreate):
     id: int
-    class Config:
-        from_attributes = True
-
-
-
-
-class RecipeParameterBase(BaseModel):
-    name: str
-    type: str
-    description: str
-
-class RecipeParameterCreate(RecipeParameterBase):
-    pass
-
-class RecipeParameterRead(RecipeParameterBase):
-    id: int
-
-    class Config:
-        from_attributes = True  # for Pydantic V2

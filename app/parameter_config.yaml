@@ -34,3 +34,9 @@ recipe_parameters:
   - name: airblast
     type: string
     description: "Airblast status"
+  - name: Ramping angle
+    type: float
+    description: "Ramping angle for helical milling"
+  # - name: Ramping pitch
+  #   type: float
+  #   description: "Ramping pitch for helical milling"
