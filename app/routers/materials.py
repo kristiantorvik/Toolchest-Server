@@ -1,40 +1,41 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
-from .. import models, schemas
-from ..db import SessionLocal
+from ..models import Material
+from ..db import get_db
+from .. import schemas
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Get all materials
+@router.get("/materials/")
+def get_materials(db: Session = Depends(get_db)):
+    materials = db.query(Material).all()
+    return [
+        {"id": m.id, "name": m.name, "comment": m.comment}
+        for m in materials
+    ]
 
-# ------------------------- MATERIALS -----------------------------
-@router.post("/materials/", response_model=schemas.MaterialRead)
+# Create new material
+@router.post("/materials/")
 def create_material(material: schemas.MaterialCreate, db: Session = Depends(get_db)):
-    db_material = models.Material(**material.dict())
-    db.add(db_material)
+    existing = db.query(Material).filter_by(name=material.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Material already exists.")
+
+    new_material = Material(name=material.name, comment=material.comment)
+    db.add(new_material)
     db.commit()
-    db.refresh(db_material)
-    return db_material
+    db.refresh(new_material)
+    return {"id": new_material.id, "name": new_material.name, "comment": new_material.comment}
 
-@router.get("/materials/", response_model=List[schemas.MaterialRead])
-def read_materials(db: Session = Depends(get_db)):
-    return db.query(models.Material).all()
 
-# ------------------------- RECIPE PARAMETERS -----------------------------
-@router.post("/recipe_parameters/", response_model=schemas.RecipeParameterRead)
-def create_recipe_parameter(param: schemas.RecipeParameterCreate, db: Session = Depends(get_db)):
-    db_param = models.RecipeParameter(**param.dict())
-    db.add(db_param)
+# Delete material
+@router.delete("/materials/{material_id}")
+def delete_material(material_id: int, db: Session = Depends(get_db)):
+    material = db.query(Material).filter_by(id=material_id).first()
+    if not material:
+        raise HTTPException(status_code=404, detail="Material not found.")
+
+    db.delete(material)
     db.commit()
-    db.refresh(db_param)
-    return db_param
-
-@router.get("/recipe_parameters/", response_model=List[schemas.RecipeParameterRead])
-def read_recipe_parameters(db: Session = Depends(get_db)):
-    return db.query(models.RecipeParameter).all()
+    return {"detail": "Material deleted."}

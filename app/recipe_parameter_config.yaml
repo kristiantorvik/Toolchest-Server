@@ -1,14 +1,3 @@
-tool_parameters:
-  - name: diameter
-    type: float
-    description: "Tool diameter in mm"
-  - name: number_of_flutes
-    type: int
-    description: "Number of flutes on tool"
-  - name: tool_designation
-    type: string
-    description: "Designation code for tool"
-
 recipe_parameters:
   - name: cutting_speed
     type: float
@@ -37,6 +26,3 @@ recipe_parameters:
   - name: Ramping angle
     type: float
     description: "Ramping angle for helical milling"
-  # - name: Ramping pitch
-  #   type: float
-  #   description: "Ramping pitch for helical milling"

@@ -5,44 +5,48 @@ def show_tooltype_form(app):
     app.operation_label.config(text="Add Tool Type")
     app.clear_content()
 
+    # Fetch tool parameters and strategies from API
+    tool_parameters = fetch("tool_parameters/")
     strategies = fetch("strategies/")
-    strategy_map = {s["name"]: s["id"] for s in strategies}
 
-    parameters = fetch("tool_parameters/")
-    parameter_map = {p["name"]: p["id"] for p in parameters}
+    # Map ids to names for both
+    tool_param_map = {param["name"]: param["id"] for param in tool_parameters}
+    strategy_map = {strategy["name"]: strategy["id"] for strategy in strategies}
 
-    tk.Label(app.content_frame, text="Type Name:").grid(row=0, column=0)
-    type_entry = tk.Entry(app.content_frame)
-    type_entry.grid(row=0, column=1)
+    # Label + Entry for name
+    tk.Label(app.content_frame, text="Tool Type Name:").grid(row=0, column=0, sticky="w")
+    name_entry = tk.Entry(app.content_frame)
+    name_entry.grid(row=0, column=1)
 
-    tk.Label(app.content_frame, text="Supported Strategies:").grid(row=1, column=0, sticky="n")
+    # Tool Parameters Listbox
+    tk.Label(app.content_frame, text="Tool Parameters:").grid(row=1, column=0, sticky="nw")
+    tool_param_listbox = tk.Listbox(app.content_frame, selectmode=tk.MULTIPLE, height=8, exportselection=False)
+    for name in tool_param_map.keys():
+        tool_param_listbox.insert(tk.END, name)
+    tool_param_listbox.grid(row=1, column=1, sticky="w")
+
+    # Strategies Listbox
+    tk.Label(app.content_frame, text="Strategies:").grid(row=2, column=0, sticky="nw")
     strategy_listbox = tk.Listbox(app.content_frame, selectmode=tk.MULTIPLE, height=8, exportselection=False)
-    for s in strategy_map.keys():
-        strategy_listbox.insert(tk.END, s)
-    strategy_listbox.grid(row=1, column=1)
-
-    tk.Label(app.content_frame, text="Relevant Tool Parameters:").grid(row=2, column=0, sticky="n")
-    param_listbox = tk.Listbox(app.content_frame, selectmode=tk.MULTIPLE, height=8, exportselection=False)
-    for p in parameter_map.keys():
-        param_listbox.insert(tk.END, p)
-    param_listbox.grid(row=2, column=1)
+    for name in strategy_map.keys():
+        strategy_listbox.insert(tk.END, name)
+    strategy_listbox.grid(row=2, column=1, sticky="w")
 
     def submit():
-        selected_strategies = strategy_listbox.curselection()
-        selected_strategy_ids = [strategy_map[list(strategy_map.keys())[i]] for i in selected_strategies]
-        selected_params = param_listbox.curselection()
-        selected_param_ids = [parameter_map[list(parameter_map.keys())[i]] for i in selected_params]
-
+        selected_parameters = [tool_param_map[tool_param_listbox.get(i)] for i in tool_param_listbox.curselection()]
+        selected_strategies = [strategy_map[strategy_listbox.get(i)] for i in strategy_listbox.curselection()]
         data = {
-            "type_name": type_entry.get(),
-            "strategy_ids": selected_strategy_ids,
-            "tool_parameter_ids": selected_param_ids
+            "name": name_entry.get(),
+            "tool_parameter_ids": selected_parameters,
+            "strategy_ids": selected_strategies
         }
+        print("DEBUG POST:", data)  # Optional debug print
+
         response = post("tool_types/", data)
-        if response.status_code == 200:
-            app.set_status("Tool Type Added!")
+        if response.ok:
+            app.set_status("Tool Type added successfully!")
             app.show_home()
         else:
-            app.set_status(f"Error {response.status_code}")
+            app.set_status(f"Error: {response.status_code}")
 
-    tk.Button(app.content_frame, text="Submit", command=submit).grid(row=3, column=0, columnspan=2, pady=10)
+    tk.Button(app.content_frame, text="Submit", command=submit).grid(row=3, column=0, columnspan=2, pady=20)

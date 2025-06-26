@@ -1,75 +1,137 @@
 from pydantic import BaseModel
-from typing import Optional, Dict
+from typing import Optional, List, Union, Dict
 
-# MATERIALS
-class MaterialCreate(BaseModel):
+# ------------------- Tool Parameters -------------------
+
+class ToolParameterBase(BaseModel):
     name: str
-    description: Optional[str] = ""
+    type: str  # "int", "float", "string"
+    description: Optional[str] = None
 
-class MaterialRead(MaterialCreate):
+class ToolParameterCreate(ToolParameterBase):
+    pass
+
+class ToolParameterRead(ToolParameterBase):
     id: int
-    class Config:
-        from_attributes = True
 
-# TOOL PARAMETERS
-class ToolParameterCreate(BaseModel):
+# ------------------- Tool Parameter Values -------------------
+
+class ToolParameterValueBase(BaseModel):
+    parameter_id: int
+    value_int: Optional[int]
+    value_float: Optional[float]
+    value_str: Optional[str]
+
+class ToolParameterValueCreate(ToolParameterValueBase):
+    tool_id: int
+
+class ToolParameterValueRead(ToolParameterValueBase):
+    id: int
+    tool_id: int
+
+# ------------------- Recipe Parameters -------------------
+
+class RecipeParameterBase(BaseModel):
     name: str
-    type: str
-    description: Optional[str] = ""
+    type: str  # "int", "float", "string"
+    description: Optional[str] = None
 
-class ToolParameterRead(ToolParameterCreate):
+class RecipeParameterCreate(RecipeParameterBase):
+    pass
+
+class RecipeParameterRead(RecipeParameterBase):
     id: int
-    class Config:
-        from_attributes = True
 
-# RECIPE PARAMETERS
-class RecipeParameterCreate(BaseModel):
+
+# ------------------- Recipe Parameter Values -------------------
+
+class RecipeParameterValueBase(BaseModel):
+    parameter_id: int
+    value_int: Optional[int]
+    value_float: Optional[float]
+    value_str: Optional[str]
+
+class RecipeParameterValueCreate(RecipeParameterValueBase):
+    recipe_id: int
+
+class RecipeParameterValueRead(RecipeParameterValueBase):
+    id: int
+    recipe_id: int
+
+# ------------------- Materials -------------------
+
+class MaterialBase(BaseModel):
     name: str
-    type: str
-    description: Optional[str] = ""
+    comment: Optional[str]
 
-class RecipeParameterRead(RecipeParameterCreate):
+class MaterialCreate(MaterialBase):
+    pass
+
+class MaterialRead(MaterialBase):
     id: int
-    class Config:
-        from_attributes = True
 
-# TOOL TYPES
-class ToolTypeCreate(BaseModel):
-    type_name: str
-    tool_parameter_ids: list[int] = []
-    strategy_ids: list[int] = []
+# ------------------- Tool Types -------------------
 
-class ToolTypeRead(ToolTypeCreate):
-    id: int
-    class Config:
-        from_attributes = True
-
-# STRATEGIES
-class StrategyCreate(BaseModel):
+class ToolTypeBase(BaseModel):
     name: str
-    description: Optional[str] = ""
-    recipe_parameter_ids: list[int] = []
+    tool_parameter_ids: List[int]
+    strategy_ids: List[int]
 
-class StrategyRead(StrategyCreate):
+class ToolTypeCreate(ToolTypeBase):
+    pass
+
+class ToolTypeRead(ToolTypeBase):
     id: int
-    class Config:
-        from_attributes = True
 
-# TOOLS
-class ToolCreate(BaseModel):
+# ------------------- Strategies -------------------
+
+class StrategyBase(BaseModel):
+    name: str
+    description: Optional[str]
+    parameter_ids: List[int]
+
+class StrategyCreate(StrategyBase):
+    pass
+
+class StrategyRead(StrategyBase):
+    id: int
+
+# ------------------- Tools -------------------
+
+class ToolBase(BaseModel):
     name: str
     tool_type_id: int
-    parameters: Dict[str, str | int | float]
+    parameters: Dict[str, Union[float, int, str]]
 
-class ToolRead(ToolCreate):
+class ToolCreate(ToolBase):
+    pass
+
+class ToolRead(ToolBase):
     id: int
 
-# RECIPES
-class RecipeCreate(BaseModel):
+# ------------------- Recipes -------------------
+
+class RecipeBase(BaseModel):
     material_id: int
     strategy_id: int
     tool_id: int
-    parameters: Dict[str, str | int | float]
 
-class RecipeRead(RecipeCreate):
+class RecipeCreate(RecipeBase):
+    parameters: Dict[str, Union[int, float, str]]
+
+class RecipeRead(RecipeBase):
     id: int
+
+# ------------------- Linking Tables -------------------
+
+class ToolTypeStrategyLinkCreate(BaseModel):
+    tooltype_id: int
+    strategy_id: int
+
+class ToolTypeToolParameterLinkCreate(BaseModel):
+    tooltype_id: int
+    toolparameter_id: int
+
+class StrategyRecipeParameterLinkCreate(BaseModel):
+    strategy_id: int
+    parameter_id: int

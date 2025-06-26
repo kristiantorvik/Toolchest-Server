@@ -1,34 +1,56 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
-from .. import models, schemas
-from ..db import SessionLocal
+from .. import models
+from ..db import get_db
+from .. import schemas
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@router.get("/strategies/")
+def get_strategies(db: Session = Depends(get_db)):
+    strategies = db.query(models.Strategy).all()
+    return [
+        {
+            "id": strategy.id,
+            "name": strategy.name,
+            "description": strategy.description
+        } for strategy in strategies
+    ]
 
 
-@router.post("/strategies/", response_model=schemas.StrategyRead)
-def create_strategy(strategy: schemas.StrategyCreate, db: Session = Depends(get_db)):
-    db_strategy = models.Strategy(name=strategy.name, description=strategy.description)
-    db.add(db_strategy)
+@router.post("/strategies/")
+def create_strategy(data: schemas.StrategyCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.Strategy).filter(models.Strategy.name == data.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Strategy already exists")
+
+    strategy = models.Strategy(name=data.name, description=data.description)
+    db.add(strategy)
     db.commit()
-    db.refresh(db_strategy)
+    db.refresh(strategy)
 
-    # Create recipe parameter links
-    for param_id in strategy.recipe_parameter_ids:
-        link = models.StrategyRecipeParameterLink(strategy_id=db_strategy.id, parameter_id=param_id)
+    # Now insert into strategy_recipeparameter_link table
+    for param_id in data.parameter_ids:
+        link = models.StrategyRecipeParameterLink(
+            strategy_id=strategy.id,
+            parameter_id=param_id
+        )
         db.add(link)
     db.commit()
-    return db_strategy
 
-@router.get("/strategies/", response_model=List[schemas.StrategyRead])
-def read_strategies(db: Session = Depends(get_db)):
-    return db.query(models.Strategy).all()
+    return {
+        "id": strategy.id,
+        "name": strategy.name,
+        "description": strategy.description
+    }
 
+
+@router.delete("/strategies/{strategy_id}")
+def delete_strategy(strategy_id: int, db: Session = Depends(get_db)):
+    strategy = db.query(models.Strategy).filter(models.Strategy.id == strategy_id).first()
+    if not strategy:
+        raise HTTPException(status_code=404, detail="Strategy not found")
+
+    db.delete(strategy)
+    db.commit()
+    return {"detail": "Strategy deleted"}

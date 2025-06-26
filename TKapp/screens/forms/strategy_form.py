@@ -1,42 +1,69 @@
 import tkinter as tk
+from tkinter import messagebox
 from api import fetch, post
 
 def show_strategy_form(app):
     app.operation_label.config(text="Add Strategy")
     app.clear_content()
 
-    parameters = fetch("recipe_parameters/")
-    parameter_map = {p["name"]: p["id"] for p in parameters}
+    parameters = fetch("/recipe_parameters/")
+    if not parameters:
+        app.set_status("No Recipe Parameters defined. Define them first.")
+        app.show_home()
+        return
 
-    tk.Label(app.content_frame, text="Strategy Name:").grid(row=0, column=0)
+    tk.Label(app.content_frame, text="Strategy Name:").grid(row=0, column=0, sticky="w")
     name_entry = tk.Entry(app.content_frame)
-    name_entry.grid(row=0, column=1)
+    name_entry.grid(row=0, column=1, sticky="ew")
 
-    tk.Label(app.content_frame, text="Description:").grid(row=1, column=0)
-    desc_entry = tk.Entry(app.content_frame)
-    desc_entry.grid(row=1, column=1)
+    tk.Label(app.content_frame, text="Description:").grid(row=1, column=0, sticky="w")
+    description_entry = tk.Entry(app.content_frame)
+    description_entry.grid(row=1, column=1, sticky="ew")
 
-    tk.Label(app.content_frame, text="Relevant Recipe Parameters:").grid(row=2, column=0, sticky="n")
-    param_listbox = tk.Listbox(app.content_frame, selectmode=tk.MULTIPLE, height=8, exportselection=False)
-    for p in parameter_map.keys():
-        param_listbox.insert(tk.END, p)
-    param_listbox.grid(row=2, column=1)
+    tk.Label(app.content_frame, text="Recipe Parameters:").grid(row=2, column=0, sticky="nw")
+
+    listbox_frame = tk.Frame(app.content_frame)
+    listbox_frame.grid(row=2, column=1, sticky="ew")
+    param_listbox = tk.Listbox(listbox_frame, selectmode=tk.MULTIPLE, height=10, width=40)
+    param_listbox.pack(side="left", fill="y")
+
+    scrollbar = tk.Scrollbar(listbox_frame, orient="vertical")
+    scrollbar.config(command=param_listbox.yview)
+    scrollbar.pack(side="right", fill="y")
+    param_listbox.config(yscrollcommand=scrollbar.set)
+
+    param_id_map = {}
+    for idx, param in enumerate(parameters):
+        param_listbox.insert(tk.END, param["name"])
+        param_id_map[idx] = param["id"]
 
     def submit():
-        selected_params = param_listbox.curselection()
-        selected_param_ids = [parameter_map[list(parameter_map.keys())[i]] for i in selected_params]
-        data = {
-            "name": name_entry.get(),
-            "description": desc_entry.get(),
-            "recipe_parameter_ids": selected_param_ids,
+        name = name_entry.get().strip()
+        description = description_entry.get().strip()
+        selected_indices = param_listbox.curselection()
+        selected_param_ids = [param_id_map[idx] for idx in selected_indices]
+
+        if not name:
+            messagebox.showerror("Validation Error", "Strategy name is required.")
+            return
+        if not selected_param_ids:
+            messagebox.showerror("Validation Error", "At least one Recipe Parameter must be selected.")
+            return
+
+        payload = {
+            "name": name,
+            "description": description,
+            "parameter_ids": selected_param_ids
         }
-        print(data)
-        
-        response = post("strategies/", data)
+
+        print(payload)
+
+        response = post("/strategies/", payload)
         if response.status_code == 200:
-            app.set_status("Strategy Added!")
+            app.set_status("Strategy added successfully.")
             app.show_home()
         else:
-            app.set_status(f"Error {response.status_code}")
+            messagebox.showerror("Error", f"Failed to add strategy: {response.status_code}")
 
-    tk.Button(app.content_frame, text="Submit", command=submit).grid(row=3, column=0, columnspan=2, pady=10)
+    submit_btn = tk.Button(app.content_frame, text="Submit", command=submit)
+    submit_btn.grid(row=99, column=0, columnspan=2, pady=10)

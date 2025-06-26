@@ -1,44 +1,55 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
 from .. import models, schemas
-from ..db import SessionLocal
+from ..db import get_db
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@router.get("/tool_types/")
+def get_tool_types(db: Session = Depends(get_db)):
+    tool_types = db.query(models.ToolType).all()
+    return [
+        {
+            "id": tool_type.id,
+            "name": tool_type.name
+        } for tool_type in tool_types
+    ]
 
-@router.post("/tool_types/", response_model=schemas.ToolTypeRead)
-def create_tool_type(tool_type: schemas.ToolTypeCreate, db: Session = Depends(get_db)):
-    db_tool_type = models.ToolType(type_name=tool_type.type_name)
-    db.add(db_tool_type)
+@router.post("/tool_types/")
+def create_tool_type(tool_type_data: schemas.ToolTypeCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.ToolType).filter(models.ToolType.name == tool_type_data.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Tool type already exists")
+    
+    tool_type = models.ToolType(name=tool_type_data.name)
+    db.add(tool_type)
     db.commit()
-    db.refresh(db_tool_type)
+    db.refresh(tool_type)
 
-    for param_id in tool_type.tool_parameter_ids:
-        link = models.ToolTypeToolParameterLink(tooltype_id=db_tool_type.id, parameter_id=param_id)
+    # Now add the links to tool parameters
+    for param_id in tool_type_data.tool_parameter_ids:
+        link = models.ToolTypeToolParameterLink(tooltype_id=tool_type.id, parameter_id=param_id)
         db.add(link)
-    for strategy_id in tool_type.strategy_ids:
-        link = models.ToolTypeStrategyLink(tooltype_id=db_tool_type.id, strategy_id=strategy_id)
+
+    # Add links to strategies
+    for strategy_id in tool_type_data.strategy_ids:
+        link = models.ToolTypeStrategyLink(tooltype_id=tool_type.id, strategy_id=strategy_id)
         db.add(link)
+
     db.commit()
-    return db_tool_type
 
-@router.get("/tool_types/", response_model=List[schemas.ToolTypeRead])
-def read_tool_types(db: Session = Depends(get_db)):
-    return db.query(models.ToolType).all()
+    return {
+        "id": tool_type.id,
+        "name": tool_type.name
+    }
 
-@router.get("/tooltype_parameters/{tooltype_id}", response_model=List[schemas.ToolParameterRead])
-def get_tooltype_parameters(tooltype_id: int, db: Session = Depends(get_db)):
-    tooltype = db.query(models.ToolType).filter(models.ToolType.id == tooltype_id).first()
-    if tooltype is None:
-        raise HTTPException(status_code=404, detail="ToolType not found")
-    links = db.query(models.ToolTypeToolParameterLink).filter_by(tooltype_id=tooltype_id).all()
-    parameter_ids = [link.parameter_id for link in links]
-    parameters = db.query(models.ToolParameter).filter(models.ToolParameter.id.in_(parameter_ids)).all()
-    return parameters
+@router.delete("/tool_types/{tool_type_id}")
+def delete_tool_type(tool_type_id: int, db: Session = Depends(get_db)):
+    tool_type = db.query(models.ToolType).filter(models.ToolType.id == tool_type_id).first()
+    if not tool_type:
+        raise HTTPException(status_code=404, detail="Tool type not found")
+    
+    db.delete(tool_type)
+    db.commit()
+
+    return {"detail": "Tool type deleted"}
