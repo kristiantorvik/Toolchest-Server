@@ -135,3 +135,13 @@ class ToolTypeToolParameterLinkCreate(BaseModel):
 class StrategyRecipeParameterLinkCreate(BaseModel):
     strategy_id: int
     parameter_id: int
+
+
+
+# ------------------- Search -------------------
+
+class SearchFilters(BaseModel):
+    strategy_id: int
+    materials: List[str]
+    tool_types: List[str]
+    tools: List[str]
