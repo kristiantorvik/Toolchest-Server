@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 from api import fetch, post
+from main import ToolChestApp
+
 
 def show_strategy_form(app):
     app.operation_label.config(text="Add Strategy")
@@ -37,7 +39,7 @@ def show_strategy_form(app):
         param_listbox.insert(tk.END, param["name"])
         param_id_map[idx] = param["id"]
 
-    def submit():
+    def submit(*args):
         name = name_entry.get().strip()
         description = description_entry.get().strip()
         selected_indices = param_listbox.curselection()
@@ -67,3 +69,7 @@ def show_strategy_form(app):
 
     submit_btn = tk.Button(app.content_frame, text="Submit", command=submit)
     submit_btn.grid(row=99, column=0, columnspan=2, pady=10)
+
+    ToolChestApp.bind_key(app, "<Return>", submit)
+    name_entry.focus_set()
+

@@ -8,3 +8,6 @@ tool_parameters:
   - name: tool_designation
     type: string
     description: "Designation code for tool"
+  - name: tool_comments
+    type: string
+    description: "General info / comment"

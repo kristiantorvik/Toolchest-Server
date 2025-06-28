@@ -1,5 +1,7 @@
 import tkinter as tk
+from tkinter import ttk
 from api import fetch, post
+from main import ToolChestApp
 
 def show_recipe_form(app):
     app.operation_label.config(text="Add Recipe")
@@ -25,7 +27,8 @@ def show_recipe_form(app):
     material_var = tk.StringVar()
     material_keys = list(material_map.keys())
     material_var.set(material_keys[0])
-    material_menu = tk.OptionMenu(app.content_frame, material_var, *material_keys)
+    material_menu = ttk.Combobox(app.content_frame, textvariable=material_var, state="readonly")
+    material_menu['values'] = material_keys
     material_menu.grid(row=0, column=1)
 
     # Strategy selector
@@ -33,13 +36,14 @@ def show_recipe_form(app):
     strategy_var = tk.StringVar()
     strategy_keys = list(strategy_map.keys())
     strategy_var.set(strategy_keys[0])
-    strategy_menu = tk.OptionMenu(app.content_frame, strategy_var, *strategy_keys)
+    strategy_menu = ttk.Combobox(app.content_frame, textvariable=strategy_var, state="readonly")
+    strategy_menu['values'] = strategy_keys
     strategy_menu.grid(row=1, column=1)
 
     # Tool selector (filtered when strategy is selected)
     tk.Label(app.content_frame, text="Tool:").grid(row=2, column=0)
     tool_var = tk.StringVar()
-    tool_menu = tk.OptionMenu(app.content_frame, tool_var, "")
+    tool_menu = ttk.Combobox(app.content_frame, textvariable=tool_var, state="readonly")
     tool_menu.grid(row=2, column=1)
 
     dynamic_fields = {}
@@ -52,10 +56,9 @@ def show_recipe_form(app):
         tools_for_strategy = fetch(f"tools/by_strategy/{strategy_id}")
         filtered_tool_map = {t["name"]: t["id"] for t in tools_for_strategy}
 
-        tool_var.set("")
-        tool_menu["menu"].delete(0, "end")
-        for tname in filtered_tool_map:
-            tool_menu["menu"].add_command(label=tname, command=tk._setit(tool_var, tname))
+        tool_keys = list(tool_map.keys())
+        tool_var.set(tool_keys[0])
+        tool_menu["values"] = tool_keys
 
         app._current_tool_map = filtered_tool_map
 
@@ -82,7 +85,7 @@ def show_recipe_form(app):
     # Initial trigger
     update_after_strategy()
 
-    def submit():
+    def submit(*args):
         data = {
             "material_id": material_map[material_var.get()],
             "strategy_id": strategy_map[strategy_var.get()]["id"],
@@ -117,3 +120,7 @@ def show_recipe_form(app):
 
 
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=100, column=0, columnspan=2, pady=20)
+
+    ToolChestApp.bind_key(app, "<Return>", submit)
+    material_menu.focus_set()
+

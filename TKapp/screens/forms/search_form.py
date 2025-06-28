@@ -3,17 +3,19 @@ from tkinter import ttk
 from tkinter import messagebox
 from api import fetch, post
 import tkinter.font as tkfont
+import key_bindings
+from main import ToolChestApp
 
 def show_search_form(app):
-    for widget in app.content_frame.winfo_children():
-        widget.destroy()
+    app.operation_label.config(text="Search Recipe")
+    app.clear_content()
 
     strategy_frame = tk.Frame(app.content_frame)
     strategy_frame.grid(row=0, column=0, sticky='NEW', padx=50, pady=10)
     tk.Label(strategy_frame, text="Strategy:").grid(row=0, column=0)
 
     strategy_var = tk.StringVar()
-    strategy_dropdown = ttk.Combobox(strategy_frame, textvariable=strategy_var)
+    strategy_dropdown = ttk.Combobox(strategy_frame, textvariable=strategy_var, state="readonly")
     strategy_dropdown.grid(row=0, column=1)
 
     listbox_frame = tk.Frame(app.content_frame)
@@ -73,7 +75,7 @@ def show_search_form(app):
 
         tooltype_listbox.bind('<<ListboxSelect>>', update_tools)
 
-    def submit():
+    def submit(*args):
         strategy_id = strategy_var.get().split(':')[0]
         materials = [material_listbox.get(i).split(':')[0] for i in material_listbox.curselection()]
         tooltypes = [tooltype_listbox.get(i).split(':')[0] for i in tooltype_listbox.curselection()]
@@ -140,3 +142,7 @@ def show_search_form(app):
     tree.heading("ID", text="Recipe ID")
     tree.column("ID", anchor="w")
     tree.grid(row=0, column=1)
+
+
+    ToolChestApp.bind_key(app, "<Return>", submit)
+    strategy_dropdown.focus_set()

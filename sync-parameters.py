@@ -38,7 +38,7 @@ def sync_parameters(session):
     session.commit()
 
 if __name__ == "__main__":
-    DATABASE_URL = "sqlite:///params.db"
+    DATABASE_URL = "sqlite:///toolchest.db"
 
     engine = create_engine(DATABASE_URL)
     Base.metadata.create_all(engine)  # Create tables if not exist

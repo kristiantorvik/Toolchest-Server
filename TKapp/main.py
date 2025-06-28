@@ -7,7 +7,9 @@ class ToolChestApp:
         self.root.title("ToolChest Server")
         self.root.geometry("500x500")
         self.create_layout()
+        self.bindings = []
         self.show_home()
+        root.bind("<Escape>", self.show_home)
 
     def create_layout(self):
         self.top_frame = tk.Frame(self.root, bg="#222", height=50)
@@ -34,13 +36,27 @@ class ToolChestApp:
         for widget in self.content_frame.winfo_children():
             widget.destroy()
 
-    def show_home(self):
+    def show_home(self, *args):
         self.operation_label.config(text="Home")
         self.clear_content()
         home.show_home(self)
+        self.unbind_all()
+        
 
     def set_status(self, message):
         self.status_label.config(text=message)
+
+
+
+    def bind_key(self, event_type, callback):
+        self.root.bind(event_type, callback)
+        self.bindings.append(event_type)
+
+    def unbind_all(self):
+        for event_type in self.bindings:
+            self.root.unbind(event_type)
+        self.bindings.clear()
+    
 
 if __name__ == "__main__":
     root = tk.Tk()

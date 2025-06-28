@@ -1,5 +1,6 @@
 import tkinter as tk
-from api import fetch, post
+from api import post
+from main import ToolChestApp
 
 def show_material_form(app):
     app.operation_label.config(text="Add Material")
@@ -13,7 +14,7 @@ def show_material_form(app):
     comment_entry = tk.Entry(app.content_frame)
     comment_entry.grid(row=1, column=1)
 
-    def submit():
+    def submit(*args):
         data = {
             "name": name_entry.get(),
             "comment": comment_entry.get()
@@ -26,3 +27,6 @@ def show_material_form(app):
             app.set_status(f"Error {response.status_code}")
 
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=3, column=0, columnspan=2, pady=20)
+
+    ToolChestApp.bind_key(app, "<Return>", submit)
+    name_entry.focus_set()

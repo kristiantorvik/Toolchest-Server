@@ -1,5 +1,7 @@
 import tkinter as tk
 from api import fetch, post
+from main import ToolChestApp
+
 
 def show_tooltype_form(app):
     app.operation_label.config(text="Add Tool Type")
@@ -32,7 +34,7 @@ def show_tooltype_form(app):
         strategy_listbox.insert(tk.END, name)
     strategy_listbox.grid(row=2, column=1, sticky="w")
 
-    def submit():
+    def submit(*args):
         selected_parameters = [tool_param_map[tool_param_listbox.get(i)] for i in tool_param_listbox.curselection()]
         selected_strategies = [strategy_map[strategy_listbox.get(i)] for i in strategy_listbox.curselection()]
         data = {
@@ -50,3 +52,6 @@ def show_tooltype_form(app):
             app.set_status(f"Error: {response.status_code}")
 
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=3, column=0, columnspan=2, pady=20)
+    ToolChestApp.bind_key(app, "<Return>", submit)
+    name_entry.focus_set()
+
