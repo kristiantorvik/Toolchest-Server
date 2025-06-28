@@ -41,18 +41,15 @@ def get_search_options(strategy_id: int, db: Session = Depends(get_db)):
 def search_recipes(filters: schemas.SearchFilters, db: Session = Depends(get_db)):
     query = db.query(models.Recipe).filter_by(strategy_id=filters.strategy_id)
 
-    if filters.materials:
-        material_ids = [m.id for m in db.query(models.Material).filter(models.Material.name.in_(filters.materials)).all()]
-        query = query.filter(models.Recipe.material_id.in_(material_ids))
+    if filters.material_ids:
+        query = query.filter(models.Recipe.material_id.in_(filters.material_ids))
 
-    if filters.tool_types:
-        tt_ids = [tt.id for tt in db.query(models.ToolType).filter(models.ToolType.name.in_(filters.tool_types)).all()]
-        tool_ids = [t.id for t in db.query(models.Tool).filter(models.Tool.tool_type_id.in_(tt_ids)).all()]
+    if filters.tool_type_ids:
+        tool_ids = [t.id for t in db.query(models.Tool).filter(models.Tool.tool_type_id.in_(filters.tool_type_ids)).all()]
         query = query.filter(models.Recipe.tool_id.in_(tool_ids))
 
-    if filters.tools:
-        t_ids = [t.id for t in db.query(models.Tool).filter(models.Tool.name.in_(filters.tools)).all()]
-        query = query.filter(models.Recipe.tool_id.in_(t_ids))
+    if filters.tool_ids:
+        query = query.filter(models.Recipe.tool_id.in_(filters.tool_ids))
 
     recipe_ids = [r.id for r in query.all()]
     return recipe_ids

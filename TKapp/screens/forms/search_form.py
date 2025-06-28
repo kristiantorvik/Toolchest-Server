@@ -1,108 +1,142 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from api import fetch, post
+import tkinter.font as tkfont
 
 def show_search_form(app):
-    app.clear_content()
+    for widget in app.content_frame.winfo_children():
+        widget.destroy()
 
-    # Strategy Dropdown
-    tk.Label(app.content_frame, text="Select Strategy:").grid(row=0, column=0, sticky="w")
-    strategies = fetch("/strategies")
-    strategy_map = {s['name']: s['id'] for s in strategies}
+    strategy_frame = tk.Frame(app.content_frame)
+    strategy_frame.grid(row=0, column=0, sticky='NEW', padx=50, pady=10)
+    tk.Label(strategy_frame, text="Strategy:").grid(row=0, column=0)
+
     strategy_var = tk.StringVar()
-    strategy_dropdown = ttk.Combobox(app.content_frame, textvariable=strategy_var, values=list(strategy_map.keys()))
-    strategy_dropdown.grid(row=0, column=1, sticky="ew")
+    strategy_dropdown = ttk.Combobox(strategy_frame, textvariable=strategy_var)
+    strategy_dropdown.grid(row=0, column=1)
 
-    # Dynamic filter listboxes
-    material_listbox = tk.Listbox(app.content_frame, selectmode=tk.MULTIPLE, exportselection=False, height=6)
-    tooltype_listbox = tk.Listbox(app.content_frame, selectmode=tk.MULTIPLE, exportselection=False, height=6)
-    tool_listbox = tk.Listbox(app.content_frame, selectmode=tk.MULTIPLE, exportselection=False, height=6)
+    listbox_frame = tk.Frame(app.content_frame)
+    listbox_frame.grid(row=1, column=0, sticky='NEW', pady=10)
 
-    # Placeholders
-    material_label = tk.Label(app.content_frame, text="Materials")
-    tooltype_label = tk.Label(app.content_frame, text="Tool Types")
-    tool_label = tk.Label(app.content_frame, text="Tools")
+    material_frame = tk.Frame(listbox_frame)
+    material_frame.grid(row=0, column=0, padx=10, pady=5)
+    tooltype_frame = tk.Frame(listbox_frame)
+    tooltype_frame.grid(row=0, column=1, padx=10, pady=5)
+    tool_frame = tk.Frame(listbox_frame)
+    tool_frame.grid(row=0, column=2, padx=10, pady=5)
+
+
+    tk.Label(material_frame, text="Materials").grid(row=0, column=0)
+    tk.Label(tooltype_frame, text="Tool Types").grid(row=0, column=0)
+    tk.Label(tool_frame, text="Tools").grid(row=0, column=0)
+
+    material_listbox = tk.Listbox(material_frame, selectmode=tk.MULTIPLE, exportselection=False)
+    material_listbox.grid(row=1, column=0)
+    tooltype_listbox = tk.Listbox(tooltype_frame, selectmode=tk.MULTIPLE, exportselection=False)
+    tooltype_listbox.grid(row=1, column=0)
+    tool_listbox = tk.Listbox(tool_frame, selectmode=tk.MULTIPLE, exportselection=False)
+    tool_listbox.grid(row=1, column=0)
+
+    treeview_frame = tk.Frame(app.content_frame, width=1)
+    treeview_frame.grid(row=3, column=0, sticky='NW', padx=5, pady=5)
+
+
+    filters = {}
+    full_tool_list = []
+
+    def update_listbox(listbox, items):
+        listbox.delete(0, tk.END)
+        for item in items:
+            listbox.insert(tk.END, f"{item['id']}: {item['name']}")
+
+    def update_tools(*args):
+        selected_tooltypes = [tooltype_listbox.get(i).split(':')[0] for i in tooltype_listbox.curselection()]
+        if selected_tooltypes:
+            filtered_tools = [t for t in full_tool_list if str(t['tool_type_id']) in selected_tooltypes]
+        else:
+            filtered_tools = full_tool_list
+        update_listbox(tool_listbox, filtered_tools)
 
     def populate_filters(*args):
-        selection = strategy_var.get()
-        if not selection:
-            return
+        strategy_id = strategy_var.get().split(':')[0]
+        data = fetch(f"/search/options/{strategy_id}")
+        filters.clear()
+        filters.update(data)
 
-        strategy_id = strategy_map[selection]
-
-        # fetch filters from backend
-        filters = fetch(f"/search/options/{strategy_id}")
-
-        def update_listbox(listbox, values):
-            listbox.delete(0, tk.END)
-            for item in values:
-                listbox.insert(tk.END, item['name'])
-
-                # Store the full tool list for later filtering
-        full_tool_list = filters['tools']
-
-        def filter_tools_by_selected_types():
-            selected_tooltype_names = [tooltype_listbox.get(i) for i in tooltype_listbox.curselection()]
-            filtered_tools = [tool for tool in full_tool_list if tool['tool_type_name'] in selected_tooltype_names]
-            update_listbox(tool_listbox, filtered_tools)
-
-        # Rebind event for updating tools when tool types change
-        def on_tooltype_select(event):
-            selected_indices = tooltype_listbox.curselection()
-    
-            if not selected_indices:
-                # No tooltypes selected: show all tools for the selected strategy
-                update_listbox(tool_listbox, full_tool_list)
-            else:
-                filter_tools_by_selected_types()
-
-            
-
-        tooltype_listbox.bind('<<ListboxSelect>>', on_tooltype_select)
-
-        # Add tool_type_name for filtering
-        tooltype_id_name_map = {t['id']: t['name'] for t in filters['tool_types']}
-        for tool in full_tool_list:
-            tool['tool_type_name'] = tooltype_id_name_map.get(tool['tool_type_id'], "Unknown")
-
-        # Initial full population of tools
-        update_listbox(tool_listbox, full_tool_list)
-
-
-        material_label.grid(row=1, column=0, sticky="w")
-        material_listbox.grid(row=2, column=0, sticky="nsew")
         update_listbox(material_listbox, filters['materials'])
-
-        tooltype_label.grid(row=1, column=1, sticky="w")
-        tooltype_listbox.grid(row=2, column=1, sticky="nsew")
         update_listbox(tooltype_listbox, filters['tool_types'])
-
-        tool_label.grid(row=1, column=2, sticky="w")
-        tool_listbox.grid(row=2, column=2, sticky="nsew")
         update_listbox(tool_listbox, filters['tools'])
 
-    strategy_dropdown.bind("<<ComboboxSelected>>", populate_filters)
+        nonlocal full_tool_list
+        full_tool_list = filters['tools']
+
+        tooltype_listbox.bind('<<ListboxSelect>>', update_tools)
 
     def submit():
-        selection = strategy_var.get()
-        if not selection:
-            app.set_status("Please select a strategy")
-            return
+        strategy_id = strategy_var.get().split(':')[0]
+        materials = [material_listbox.get(i).split(':')[0] for i in material_listbox.curselection()]
+        tooltypes = [tooltype_listbox.get(i).split(':')[0] for i in tooltype_listbox.curselection()]
+        tools = [tool_listbox.get(i).split(':')[0] for i in tool_listbox.curselection()]
 
-        strategy_id = strategy_map[selection]
-        selected_materials = [material_listbox.get(i) for i in material_listbox.curselection()]
-        selected_tooltypes = [tooltype_listbox.get(i) for i in tooltype_listbox.curselection()]
-        selected_tools = [tool_listbox.get(i) for i in tool_listbox.curselection()]
-
-        data = {
-            "strategy_id": strategy_id,
-            "materials": selected_materials,
-            "tool_types": selected_tooltypes,
-            "tools": selected_tools
+        payload = {
+            "strategy_id": int(strategy_id),
+            "material_ids": list(map(int, materials)),
+            "tool_type_ids": list(map(int, tooltypes)),
+            "tool_ids": list(map(int, tools)),
         }
 
-        results = post("/search", data)
-        print("Matching Recipe IDs:", results.json())
-        app.set_status(f"Found matching recipes. See console for IDs.")
+        recipe_ids = post("/search/", payload).json()
 
-    tk.Button(app.content_frame, text="Search", command=submit).grid(row=3, column=0, columnspan=3, pady=10)
+        for row in tree.get_children():
+            tree.delete(row)
+        tree["columns"] = ()
+        tree["show"] = "headings"
+        for col in tree["columns"]:
+            tree.heading(col, text="")
+
+        if not recipe_ids:
+            messagebox.showinfo("No Results", "No matching recipes found.")
+            return
+
+        first = fetch(f"/recipe_detail/{recipe_ids[0]}")
+        columns = ["id", "material", "tool"] + list(first["parameters"].keys())
+
+        tree["columns"] = columns
+        for col in columns:
+            tree.heading(col, text=col.replace("_", " ").title())
+
+        for rid in recipe_ids:
+            data = fetch(f"/recipe_detail/{rid}")
+            row = [data["id"], data["material"], data["tool"]]
+            row += [data["parameters"].get(k, "") for k in first["parameters"].keys()]
+            tree.insert("", tk.END, values=row)
+
+        # auto resice columns
+        tree.grid_remove()
+        tree.grid(row=0, column=1)
+        for col in columns:
+            max_width = tkfont.Font().measure(col)
+            for item in tree.get_children():
+                cell = str(tree.set(item, col))
+                cell_width = tkfont.Font().measure(cell)
+                if cell_width > max_width:
+                    max_width = cell_width
+            tree.column(column=col, width=max_width + 10, stretch=False)
+
+
+    tk.Button(strategy_frame, text="Search", command=submit).grid(row=0, column=2, padx=20)
+
+    strategies = fetch("/strategies/")
+    strategy_dropdown['values'] = [f"{s['id']}: {s['name']}" for s in strategies]
+    strategy_dropdown.bind("<<ComboboxSelected>>", populate_filters)
+
+
+    tree = ttk.Treeview(treeview_frame, columns=("ID",), show='headings')
+    scrollbar = ttk.Scrollbar(treeview_frame, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=scrollbar.set)
+    scrollbar.grid(row=0, column=0)
+    tree['columns'] = ("ID",)
+    tree.heading("ID", text="Recipe ID")
+    tree.column("ID", anchor="w")
+    tree.grid(row=0, column=1)

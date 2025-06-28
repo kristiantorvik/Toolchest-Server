@@ -55,7 +55,6 @@ class RecipeParameterValueCreate(RecipeParameterValueBase):
     recipe_id: int
 
 class RecipeParameterValueRead(RecipeParameterValueBase):
-    id: int
     recipe_id: int
 
 # ------------------- Materials -------------------
@@ -142,6 +141,6 @@ class StrategyRecipeParameterLinkCreate(BaseModel):
 
 class SearchFilters(BaseModel):
     strategy_id: int
-    materials: List[str]
-    tool_types: List[str]
-    tools: List[str]
+    material_ids: List[int]
+    tool_type_ids: List[int]
+    tool_ids: List[int]

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import models
+from app import models, schemas
 from ..db import get_db
 
 router = APIRouter()
@@ -43,27 +43,27 @@ def set_recipe_parameter_value(recipe_id: int, parameter_id: int, value: str, db
 
     return {"detail": "Parameter value saved"}
 
-@router.get("/recipes/{recipe_id}/parameters/")
-def get_recipe_parameter_values(recipe_id: int, db: Session = Depends(get_db)):
+
+@router.get("/recipe_detail/{recipe_id}")
+def get_recipe_detail(recipe_id: int, db: Session = Depends(get_db)):
     recipe = db.query(models.Recipe).filter_by(id=recipe_id).first()
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
 
-    values = []
-    for value in recipe.parameter_values:
-        param = value.parameter
-        if param.type == "int":
-            val = value.value_int
-        elif param.type == "float":
-            val = value.value_float
-        elif param.type == "string":
-            val = value.value_str
-        else:
-            val = None
-        values.append({
-            "parameter_id": param.id,
-            "parameter_name": param.name,
-            "value": val
-        })
+    material = db.query(models.Material).filter_by(id=recipe.material_id).first()
+    tool = db.query(models.Tool).filter_by(id=recipe.tool_id).first()
 
-    return values
+    values = db.query(models.RecipeParameterValue).filter_by(recipe_id=recipe.id).all()
+    parameter_map = {}
+    for v in values:
+        param = db.query(models.RecipeParameter).filter_by(id=v.parameter_id).first()
+        val = v.value_float or v.value_int or v.value_str
+        parameter_map[param.name] = val
+
+    return {
+        "id": recipe.id,
+        "material": material.name,
+        "tool": tool.name,
+        "parameters": parameter_map,
+    }
+
