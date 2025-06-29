@@ -1,9 +1,10 @@
 import tkinter as tk
 from api import fetch, post
-from main import ToolChestApp
+from helper_func import keybinds
 
 
 def show_tool_form(app):
+    keybinds.unbind_all(app)
     app.operation_label.config(text="Add Tool")
     app.clear_content()
 
@@ -79,7 +80,7 @@ def show_tool_form(app):
             app.set_status(f"Error {response.status_code}")
 
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=100, column=0, columnspan=2, pady=20)
-    ToolChestApp.bind_key(app, "<Return>", submit)
+    keybinds.bind_key(app, "<Return>", submit)
     name_entry.focus_set()
 
 

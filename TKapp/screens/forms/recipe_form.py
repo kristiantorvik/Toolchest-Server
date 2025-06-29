@@ -1,9 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 from api import fetch, post
-from main import ToolChestApp
+from helper_func import keybinds
 
 def show_recipe_form(app):
+    keybinds.unbind_all(app)
     app.operation_label.config(text="Add Recipe")
     app.clear_content()
 
@@ -121,6 +122,6 @@ def show_recipe_form(app):
 
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=100, column=0, columnspan=2, pady=20)
 
-    ToolChestApp.bind_key(app, "<Return>", submit)
+    keybinds.bind_key(app, "<Return>", submit)
     material_menu.focus_set()
 

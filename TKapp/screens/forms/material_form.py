@@ -1,10 +1,11 @@
 import tkinter as tk
 from api import post
-from main import ToolChestApp
+from helper_func import keybinds
 
 def show_material_form(app):
     app.operation_label.config(text="Add Material")
     app.clear_content()
+    keybinds.unbind_all(app)
 
     tk.Label(app.content_frame, text="Material Name:").grid(row=0, column=0)
     name_entry = tk.Entry(app.content_frame)
@@ -28,5 +29,5 @@ def show_material_form(app):
 
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=3, column=0, columnspan=2, pady=20)
 
-    ToolChestApp.bind_key(app, "<Return>", submit)
+    keybinds.bind_key(app, "<Return>", submit)
     name_entry.focus_set()

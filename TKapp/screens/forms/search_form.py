@@ -3,10 +3,10 @@ from tkinter import ttk
 from tkinter import messagebox
 from api import fetch, post
 import tkinter.font as tkfont
-import key_bindings
-from main import ToolChestApp
+from helper_func import keybinds
 
 def show_search_form(app):
+    keybinds.unbind_all(app)
     app.operation_label.config(text="Search Recipe")
     app.clear_content()
 
@@ -101,18 +101,38 @@ def show_search_form(app):
             messagebox.showinfo("No Results", "No matching recipes found.")
             return
 
-        first = fetch(f"/recipe_detail/{recipe_ids[0]}")
-        columns = ["id", "material", "tool"] + list(first["parameters"].keys())
 
+
+        # Fetch all recipe details and collect their parameter keys
+        recipe_details = []
+        used_param_keys = set()
+
+        all_parameters = fetch(f"recipe_parameters/by_strategy/{strategy_id}")
+        all_param_keys = ([param["name"] for param in all_parameters])
+        
+
+        for rid in recipe_ids:
+            data = fetch(f"/recipe_detail/{rid}")
+            recipe_details.append(data)
+            used_param_keys.update(data["parameters"].keys())
+
+        used_param_keys = [name for name in all_param_keys if name in used_param_keys]
+
+        # Now build the final ordered column list:
+        columns = ["id", "material", "tool"] + (used_param_keys)
+
+        # Set columns & headings
         tree["columns"] = columns
         for col in columns:
             tree.heading(col, text=col.replace("_", " ").title())
 
-        for rid in recipe_ids:
-            data = fetch(f"/recipe_detail/{rid}")
+        # Insert rows
+        for data in recipe_details:
             row = [data["id"], data["material"], data["tool"]]
-            row += [data["parameters"].get(k, "") for k in first["parameters"].keys()]
+            row += [data["parameters"].get(k, "") for k in (used_param_keys)]
             tree.insert("", tk.END, values=row)
+
+
 
         # auto resice columns
         tree.grid_remove()
@@ -144,5 +164,5 @@ def show_search_form(app):
     tree.grid(row=0, column=1)
 
 
-    ToolChestApp.bind_key(app, "<Return>", submit)
+    keybinds.bind_key(app, "<Return>", submit)
     strategy_dropdown.focus_set()

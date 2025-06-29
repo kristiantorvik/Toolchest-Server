@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import messagebox
 from api import fetch, post
-from main import ToolChestApp
+from helper_func import keybinds
 
 
 def show_strategy_form(app):
+    keybinds.unbind_all(app)
     app.operation_label.config(text="Add Strategy")
     app.clear_content()
 
@@ -70,6 +71,6 @@ def show_strategy_form(app):
     submit_btn = tk.Button(app.content_frame, text="Submit", command=submit)
     submit_btn.grid(row=99, column=0, columnspan=2, pady=10)
 
-    ToolChestApp.bind_key(app, "<Return>", submit)
+    keybinds.bind_key(app, "<Return>", submit)
     name_entry.focus_set()
 

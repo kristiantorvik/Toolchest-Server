@@ -1,13 +1,13 @@
 import tkinter as tk
 from screens import home
+from helper_func import keybinds
 
 class ToolChestApp:
     def __init__(self, root):
         self.root = root
         self.root.title("ToolChest Server")
-        self.root.geometry("500x500")
+        self.root.geometry("1000x600")
         self.create_layout()
-        self.bindings = []
         self.show_home()
         root.bind("<Escape>", self.show_home)
 
@@ -39,24 +39,13 @@ class ToolChestApp:
     def show_home(self, *args):
         self.operation_label.config(text="Home")
         self.clear_content()
+        keybinds.unbind_all(self)
         home.show_home(self)
-        self.unbind_all()
         
 
     def set_status(self, message):
         self.status_label.config(text=message)
 
-
-
-    def bind_key(self, event_type, callback):
-        self.root.bind(event_type, callback)
-        self.bindings.append(event_type)
-
-    def unbind_all(self):
-        for event_type in self.bindings:
-            self.root.unbind(event_type)
-        self.bindings.clear()
-    
 
 if __name__ == "__main__":
     root = tk.Tk()
