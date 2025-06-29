@@ -56,8 +56,9 @@ def show_recipe_form(app):
         # Update tool list filtered by strategy
         tools_for_strategy = fetch(f"tools/by_strategy/{strategy_id}")
         filtered_tool_map = {t["name"]: t["id"] for t in tools_for_strategy}
+        print(filtered_tool_map)
 
-        tool_keys = list(tool_map.keys())
+        tool_keys = list(filtered_tool_map.keys())
         tool_var.set(tool_keys[0])
         tool_menu["values"] = tool_keys
 
