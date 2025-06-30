@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Json
 from typing import Optional, List, Union, Dict
 
 # ------------------- Tool Parameters -------------------
@@ -144,3 +144,7 @@ class SearchFilters(BaseModel):
     material_ids: List[int]
     tool_type_ids: List[int]
     tool_ids: List[int]
+
+class SearchTools(BaseModel):
+    tool_type_id: int
+    parameters: Dict[str, Union[int, float, str]]
