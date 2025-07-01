@@ -4,7 +4,7 @@ from helper_func import keybinds
 
 
 def show_tooltype_form(app):
-    keybinds.unbind_all
+    keybinds.unbind_all(app)
     app.operation_label.config(text="Add Tool Type")
     app.clear_content()
 

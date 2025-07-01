@@ -41,7 +41,7 @@ def create_tool(tool_data: schemas.ToolCreate, db: Session = Depends(get_db)):
             parameter_id=param_obj.id,
             value_float=value if param_obj.type == "float" else None,
             value_int=value if param_obj.type == "int" else None,
-            value_str=value if param_obj.type == "str" else None
+            value_str=value if param_obj.type == "string" else None
         )
         db.add(param_value)
 

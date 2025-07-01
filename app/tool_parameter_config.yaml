@@ -8,6 +8,12 @@ tool_parameters:
   - name: tool_designation
     type: string
     description: "Designation code for tool"
+  - name: insert_designation
+    type: string
+    description: "Designation code for insert"
+  - name: vendor
+    type: string
+    description: "vendor of tool"
   - name: tool_comments
     type: string
     description: "General info / comment"

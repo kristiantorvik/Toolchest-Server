@@ -18,8 +18,8 @@ def get_tool_parameters(db: Session = Depends(get_db)):
         } for p in parameters
     ]
 
-@router.get("/tooltype_parameters/{tooltype_id}", response_model=List[schemas.ToolParameterRead])
-def get_tooltype_parameters(tooltype_id: int, db: Session = Depends(get_db)):
+@router.get("/tool_parameters/by_tooltype/{tooltype_id}", response_model=List[schemas.ToolParameterRead])
+def tool_parameters_by_tooltype(tooltype_id: int, db: Session = Depends(get_db)):
     tooltype = db.query(models.ToolType).filter(models.ToolType.id == tooltype_id).first()
     if tooltype is None:
         raise HTTPException(status_code=404, detail="ToolType not found")

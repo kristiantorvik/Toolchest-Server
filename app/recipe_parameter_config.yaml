@@ -15,8 +15,8 @@ recipe_parameters:
     type: float
     description: "Pecking depth for drilling"
   - name: lifetime
-    type: int
-    description: "Tool lifetime in parts"
+    type: float
+    description: "Tool lifetime in minutes"
   - name: coolant
     type: string
     description: "Coolant type"

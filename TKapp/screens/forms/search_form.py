@@ -10,13 +10,25 @@ def show_search_form(app):
     app.operation_label.config(text="Search Recipe")
     app.clear_content()
 
+    strategies = fetch("/strategies/")
+    if not strategies:
+        app.set_status("No recipes in DB")
+        app.show_home()
+        return
+    
+    stragegy_map = {t["name"]: t for t in strategies}
+    strategy_keys = list(stragegy_map.keys())
+
     strategy_frame = tk.Frame(app.content_frame)
     strategy_frame.grid(row=0, column=0, sticky='NEW', padx=50, pady=10)
     tk.Label(strategy_frame, text="Strategy:").grid(row=0, column=0)
-
+    
     strategy_var = tk.StringVar()
+    strategy_var.set(strategy_keys[0])
     strategy_dropdown = ttk.Combobox(strategy_frame, textvariable=strategy_var, state="readonly")
     strategy_dropdown.grid(row=0, column=1)
+
+    strategy_dropdown['values'] = strategy_keys
 
     listbox_frame = tk.Frame(app.content_frame)
     listbox_frame.grid(row=1, column=0, sticky='NEW', pady=10)
@@ -61,8 +73,8 @@ def show_search_form(app):
         update_listbox(tool_listbox, filtered_tools)
 
     def populate_filters(*args):
-        strategy_id = strategy_var.get().split(':')[0]
-        data = fetch(f"/search/options/{strategy_id}")
+        selected_strategy = stragegy_map[strategy_var.get()]
+        data = fetch(f"/search/options/{selected_strategy['id']}")
         filters.clear()
         filters.update(data)
 
@@ -74,15 +86,16 @@ def show_search_form(app):
         full_tool_list = filters['tools']
 
         tooltype_listbox.bind('<<ListboxSelect>>', update_tools)
+        submit()
 
     def submit(*args):
-        strategy_id = strategy_var.get().split(':')[0]
+        selected_strategy = stragegy_map[strategy_var.get()]
         materials = [material_listbox.get(i).split(':')[0] for i in material_listbox.curselection()]
         tooltypes = [tooltype_listbox.get(i).split(':')[0] for i in tooltype_listbox.curselection()]
         tools = [tool_listbox.get(i).split(':')[0] for i in tool_listbox.curselection()]
 
         payload = {
-            "strategy_id": int(strategy_id),
+            "strategy_id": selected_strategy['id'],
             "material_ids": list(map(int, materials)),
             "tool_type_ids": list(map(int, tooltypes)),
             "tool_ids": list(map(int, tools)),
@@ -98,16 +111,16 @@ def show_search_form(app):
             tree.heading(col, text="")
 
         if not recipe_ids:
-            messagebox.showinfo("No Results", "No matching recipes found.")
-            return
-
+            app.set_status("Found no matching recipe in DB")
+        else:
+            app.set_status(f"Found {len(recipe_ids)} matching tools")
 
 
         # Fetch all recipe details and collect their parameter keys
         recipe_details = []
         used_param_keys = set()
 
-        all_parameters = fetch(f"recipe_parameters/by_strategy/{strategy_id}")
+        all_parameters = fetch(f"recipe_parameters/by_strategy/{selected_strategy['id']}")
         all_param_keys = ([param["name"] for param in all_parameters])
         
 
@@ -147,12 +160,8 @@ def show_search_form(app):
             tree.column(column=col, width=max_width + 10, stretch=False)
 
 
+
     tk.Button(strategy_frame, text="Search", command=submit).grid(row=0, column=2, padx=20)
-
-    strategies = fetch("/strategies/")
-    strategy_dropdown['values'] = [f"{s['id']}: {s['name']}" for s in strategies]
-    strategy_dropdown.bind("<<ComboboxSelected>>", populate_filters)
-
 
     tree = ttk.Treeview(treeview_frame, columns=("ID",), show='headings')
     scrollbar = ttk.Scrollbar(treeview_frame, orient="vertical", command=tree.yview)
@@ -163,6 +172,9 @@ def show_search_form(app):
     tree.column("ID", anchor="w")
     tree.grid(row=0, column=1)
 
+    
+    strategy_dropdown.bind("<<ComboboxSelected>>", populate_filters)
+    populate_filters()
 
     keybinds.bind_key(app, "<Return>", submit)
     strategy_dropdown.focus_set()

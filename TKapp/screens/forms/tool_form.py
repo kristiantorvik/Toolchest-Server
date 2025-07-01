@@ -38,7 +38,7 @@ def show_tool_form(app):
         dynamic_fields.clear()
 
         selected_tooltype = tooltype_map[tooltype_var.get()]
-        parameters = fetch(f"tooltype_parameters/{selected_tooltype['id']}")
+        parameters = fetch(f"/tool_parameters/by_tooltype/{selected_tooltype['id']}")
 
         for i, param in enumerate(parameters):
             pname, ptype = param["name"], param["type"]

@@ -47,6 +47,30 @@ def update_tool_parameter_values(tool_id: int, parameters: dict, db: Session = D
 
     return {"detail": "Parameter values updated"}
 
+
+
+@router.get("/tool_detail/{tool_id}")
+def get_tool_detail(tool_id: int, db: Session = Depends(get_db)):
+    tool = db.query(models.Tool).filter_by(id=tool_id).first()
+    if not tool:
+        raise HTTPException(status_code=404, detail="tool not found")
+
+    values = db.query(models.ToolParameterValue).filter_by(tool_id=tool.id).all()
+    parameter_map = {}
+    for v in values:
+        param = db.query(models.ToolParameter).filter_by(id=v.parameter_id).first()
+        val = v.value_float or v.value_int or v.value_str
+        parameter_map[param.name] = val
+
+    return {
+        "id": tool.id,
+        "name": tool.name,
+        "parameters": parameter_map,
+    }
+
+
+
+
 @router.get("/tools/{tool_id}/parameters")
 def get_tool_parameter_values(tool_id: int, db: Session = Depends(get_db)):
     tool = db.query(models.Tool).filter(models.Tool.id == tool_id).first()
