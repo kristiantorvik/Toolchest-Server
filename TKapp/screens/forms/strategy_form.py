@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import messagebox
 from api import fetch, post
 from helper_func import keybinds
 
@@ -47,10 +46,10 @@ def show_strategy_form(app):
         selected_param_ids = [param_id_map[idx] for idx in selected_indices]
 
         if not name:
-            messagebox.showerror("Validation Error", "Strategy name is required.")
+            app.set_status("Error: Strategy name is required")
             return
         if not selected_param_ids:
-            messagebox.showerror("Validation Error", "At least one Recipe Parameter must be selected.")
+            app.set_status("Error: At least one Recipe Parameter must be selected")
             return
 
         payload = {

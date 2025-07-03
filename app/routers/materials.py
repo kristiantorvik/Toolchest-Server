@@ -24,7 +24,6 @@ def create_material(material: schemas.MaterialCreate, db: Session = Depends(get_
 
     new_material = Material(name=material.name, comment=material.comment)
     db.add(new_material)
-    print(f"hello from my debug print: {db.add}")
     db.commit()
     db.refresh(new_material)
     return {"id": new_material.id, "name": new_material.name, "comment": new_material.comment}

@@ -76,6 +76,7 @@ def create_recipe(data: schemas.RecipeCreate, db: Session = Depends(get_db)):
         "parameters_saved": list(data.parameters.keys())
     }
 
+
 @router.delete("/recipes/{recipe_id}")
 def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     recipe = db.query(models.Recipe).filter(models.Recipe.id == recipe_id).first()
@@ -85,3 +86,15 @@ def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     db.delete(recipe)
     db.commit()
     return {"detail": "Recipe deleted"}
+
+@router.get("/recipes_by_tool/{tool_id}")
+def recipe_by_tool(tool_id: int, db: Session = Depends(get_db)):
+    tool = db.query(models.Tool).filter(models.Tool.id == tool_id).first()
+    if not tool:
+        return None
+    recipes = db.query(models.Recipe).filter(models.Recipe.tool_id == tool.id)
+    if not recipes:
+        return None
+    recipe_ids = [r.id for r in recipes.all()]
+    return recipe_ids
+

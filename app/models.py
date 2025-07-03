@@ -18,8 +18,8 @@ class ToolType(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
 
-    strategies = relationship("ToolTypeStrategyLink", back_populates="tool_type")
-    parameters = relationship("ToolTypeToolParameterLink", back_populates="tool_type")
+    strategies = relationship("ToolTypeStrategyLink", back_populates="tool_type", passive_deletes=True)
+    parameters = relationship("ToolTypeToolParameterLink", back_populates="tool_type", passive_deletes=True)
 
 
 # --- Strategies ---
@@ -30,7 +30,7 @@ class Strategy(Base):
     name = Column(String, unique=True, nullable=False)
     description = Column(String)
 
-    recipe_parameters = relationship("StrategyRecipeParameterLink", back_populates="strategy")
+    recipe_parameters = relationship("StrategyRecipeParameterLink", back_populates="strategy", passive_deletes=True)
 
 
 # --- Tools ---
@@ -39,9 +39,9 @@ class Tool(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    tool_type_id = Column(Integer, ForeignKey("tool_types.id"), nullable=False)
+    tool_type_id = Column(Integer, ForeignKey("tool_types.id", ondelete="CASCADE"), nullable=False)
 
-    parameter_values = relationship("ToolParameterValue", back_populates="tool")
+    parameter_values = relationship("ToolParameterValue", back_populates="tool", passive_deletes=True)
 
 
 # --- Recipes ---
@@ -49,11 +49,11 @@ class Recipe(Base):
     __tablename__ = "recipes"
 
     id = Column(Integer, primary_key=True)
-    material_id = Column(Integer, ForeignKey("materials.id"), nullable=False)
-    strategy_id = Column(Integer, ForeignKey("strategies.id"), nullable=False)
-    tool_id = Column(Integer, ForeignKey("tools.id"), nullable=False)
+    material_id = Column(Integer, ForeignKey("materials.id", ondelete="CASCADE"), nullable=False)
+    strategy_id = Column(Integer, ForeignKey("strategies.id", ondelete="CASCADE"), nullable=False)
+    tool_id = Column(Integer, ForeignKey("tools.id", ondelete="CASCADE"), nullable=False)
 
-    parameter_values = relationship("RecipeParameterValue", back_populates="recipe")
+    parameter_values = relationship("RecipeParameterValue", back_populates="recipe", passive_deletes=True)
 
 
 # --- Recipe Parameters ---
@@ -70,26 +70,26 @@ class RecipeParameterValue(Base):
     __tablename__ = "recipe_parameter_values"
 
     id = Column(Integer, primary_key=True)
-    recipe_id = Column(Integer, ForeignKey("recipes.id"), nullable=False)
-    parameter_id = Column(Integer, ForeignKey("recipe_parameters.id"), nullable=False)
+    recipe_id = Column(Integer, ForeignKey("recipes.id", ondelete="CASCADE"), nullable=False)
+    parameter_id = Column(Integer, ForeignKey("recipe_parameters.id", ondelete="RESTRICT"), nullable=False)
 
     value_float = Column(Float, nullable=True)
     value_int = Column(Integer, nullable=True)
     value_str = Column(String, nullable=True)
 
-    recipe = relationship("Recipe", back_populates="parameter_values")
-    parameter = relationship("RecipeParameter")
+    recipe = relationship("Recipe", back_populates="parameter_values", passive_deletes=True)
+    parameter = relationship("RecipeParameter", passive_deletes=True)
 
 
 class StrategyRecipeParameterLink(Base):
     __tablename__ = "strategy_recipeparameter_link"
 
     id = Column(Integer, primary_key=True)
-    strategy_id = Column(Integer, ForeignKey("strategies.id"), nullable=False)
-    parameter_id = Column(Integer, ForeignKey("recipe_parameters.id"), nullable=False)
+    strategy_id = Column(Integer, ForeignKey("strategies.id", ondelete="CASCADE"), nullable=False)
+    parameter_id = Column(Integer, ForeignKey("recipe_parameters.id", ondelete="RESTRICT"), nullable=False)
 
-    strategy = relationship("Strategy", back_populates="recipe_parameters")
-    recipe_parameter = relationship("RecipeParameter")
+    strategy = relationship("Strategy", back_populates="recipe_parameters", passive_deletes=True)
+    recipe_parameter = relationship("RecipeParameter", passive_deletes=True)
 
 
 # --- Tool Parameters ---
@@ -106,34 +106,34 @@ class ToolParameterValue(Base):
     __tablename__ = "tool_parameter_values"
 
     id = Column(Integer, primary_key=True)
-    tool_id = Column(Integer, ForeignKey("tools.id"), nullable=False)
-    parameter_id = Column(Integer, ForeignKey("tool_parameters.id"), nullable=False)
+    tool_id = Column(Integer, ForeignKey("tools.id", ondelete="CASCADE"), nullable=False)
+    parameter_id = Column(Integer, ForeignKey("tool_parameters.id", ondelete="CASCADE"), nullable=False)
 
     value_float = Column(Float, nullable=True)
     value_int = Column(Integer, nullable=True)
     value_str = Column(String, nullable=True)
 
-    tool = relationship("Tool", back_populates="parameter_values")
-    parameter = relationship("ToolParameter")
+    tool = relationship("Tool", back_populates="parameter_values", passive_deletes=True)
+    parameter = relationship("ToolParameter", passive_deletes=True)
 
 
 class ToolTypeStrategyLink(Base):
     __tablename__ = "tooltype_strategy_link"
 
     id = Column(Integer, primary_key=True)
-    tooltype_id = Column(Integer, ForeignKey("tool_types.id"), nullable=False)
-    strategy_id = Column(Integer, ForeignKey("strategies.id"), nullable=False)
+    tooltype_id = Column(Integer, ForeignKey("tool_types.id", ondelete="CASCADE"), nullable=False)
+    strategy_id = Column(Integer, ForeignKey("strategies.id", ondelete="CASCADE"), nullable=False)
 
-    tool_type = relationship("ToolType", back_populates="strategies")
-    strategy = relationship("Strategy")
+    tool_type = relationship("ToolType", back_populates="strategies", passive_deletes=True)
+    strategy = relationship("Strategy", passive_deletes=True)
 
 
 class ToolTypeToolParameterLink(Base):
     __tablename__ = "tooltype_toolparameter_link"
 
     id = Column(Integer, primary_key=True)
-    tooltype_id = Column(Integer, ForeignKey("tool_types.id"), nullable=False)
-    parameter_id = Column(Integer, ForeignKey("tool_parameters.id"), nullable=False)
+    tooltype_id = Column(Integer, ForeignKey("tool_types.id", ondelete="CASCADE"), nullable=False)
+    parameter_id = Column(Integer, ForeignKey("tool_parameters.id", ondelete="CASCADE"), nullable=False)
 
-    tool_type = relationship("ToolType", back_populates="parameters")
-    parameter = relationship("ToolParameter")
+    tool_type = relationship("ToolType", back_populates="parameters", passive_deletes=True)
+    parameter = relationship("ToolParameter", passive_deletes=True)

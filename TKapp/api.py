@@ -11,3 +11,6 @@ def post(endpoint, data):
     response = requests.post(f"{API_URL}/{endpoint}", json=data, headers=headers)
     return response
 
+def delete(endpoint):
+    response = requests.delete(f"{API_URL}/{endpoint}")
+    return response.json() if response.status_code == 200 else []

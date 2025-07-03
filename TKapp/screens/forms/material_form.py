@@ -23,7 +23,6 @@ def show_material_form(app):
         response = post("materials/", data)
         if response.status_code == 200:
             app.set_status("Material Added!")
-            app.show_home()
         else:
             app.set_status(f"Error {response.status_code}")
 

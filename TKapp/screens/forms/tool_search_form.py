@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from api import fetch, post
+from api import fetch, post, delete
 import tkinter.font as tkfont
 from helper_func import keybinds
 
@@ -21,7 +21,7 @@ def show_tool_search_form(app):
     tool_type_keys = list(tool_type_map.keys())
 
     tool_type_frame = tk.Frame(app.content_frame)
-    tool_type_frame.grid(row=0, column=0, sticky='NEW', padx=50, pady=10)
+    tool_type_frame.grid(row=0, column=0, sticky='NEW', padx=20, pady=10)
     tk.Label(tool_type_frame, text="Tool Type:").grid(row=0, column=0)
 
     tool_type_var = tk.StringVar()
@@ -32,6 +32,9 @@ def show_tool_search_form(app):
 
     filter_frame = tk.Frame(app.content_frame)
     filter_frame.grid(row=1, column=0)
+
+    button_frame = tk.Frame(app.content_frame, padx=20)
+    button_frame.grid(row=0, column=1, rowspan=2)
 
 
     
@@ -62,8 +65,10 @@ def show_tool_search_form(app):
 
 
 
-    treeview_frame = tk.Frame(app.content_frame, width=1)
-    treeview_frame.grid(row=2, column=0, sticky='NW', padx=5, pady=5)
+    # treeview_frame = tk.Frame(app.content_frame, width=1)
+    treeview_frame = tk.Frame(app.content_frame)
+
+    treeview_frame.grid(row=2, column=0, sticky='NW', padx=5, pady=5, columnspan=2)
 
 
     def get_filters():
@@ -164,8 +169,6 @@ def show_tool_search_form(app):
             tree.column(column=col, width=max_width + 10, stretch=False)
 
 
-    tk.Button(tool_type_frame, text="Search", command=submit).grid(row=0, column=2, padx=20)
-
     # strategies = fetch("/strategies/")
     # strategy_dropdown['values'] = [f"{s['id']}: {s['name']}" for s in strategies]
     # strategy_dropdown.bind("<<ComboboxSelected>>", populate_filters)
@@ -180,8 +183,66 @@ def show_tool_search_form(app):
     tree.column("ID", anchor="w")
     tree.grid(row=0, column=1)
 
+    def edit_selected_tool(*args):
+        selected_rows = tree.selection()  # Returns a tuple of selected item IDs
+        if len(selected_rows) == 1:
+            item_data = tree.item(selected_rows[0])  # Returns a dictionary of attributes for first item
+            print("Selected values:", item_data["values"][0])
+        elif len(selected_rows) > 1:
+            app.set_status("Select only one entry to edit")
+            return
+        
+    def delete_selected_tool(*args):
+        tools_to_delete = []
+        selected_rows = tree.selection()  # Returns a tuple of selected item IDs
+
+        for row in selected_rows:
+            item_data = tree.item(row)  # Returns a dictionary of attributes
+            tools_to_delete.append(item_data['values'][0])
+
+        if not tools_to_delete:
+            return
+        
+        ok = messagebox.askokcancel("Confirm delete!", f"Permanently delete:{tools_to_delete}\nThis cannot be undone")
+        if not ok:
+            print("ldkøfjalds")
+            return
+
+        for tool_id in tools_to_delete:
+            ok = False
+            recipes = fetch(f"/recipes_by_tool/{tool_id}")
+            if recipes:
+                ok = messagebox.askokcancel("Tool used!", f"Tool {tool_id} is used in recipes:\n{recipes}\nForce delete?\nThis will delete associated recipes.")
+            else: ok = True
+
+            if not ok:
+                print("not ok")
+                return
+            
+            response = delete(f"/tool/{tool_id}")
+            if response:
+                app.set_status(f"Deleted tool {tool_id}")
+                submit()
+            else: app.set_status(f"Error when deleting tool {tool_id}")
+        
+
+
+
+    tk.Button(button_frame, text="Search", command=submit, width=15).grid(row=0, column=0, pady=5)
+    tk.Label(button_frame, text="Enter").grid(row=0, column=1)
+    tk.Button(button_frame, text="Edit", command=edit_selected_tool, width=15).grid(row=1, column=0, pady=5)
+    tk.Label(button_frame, text="E").grid(row=1, column=1)
+    tk.Button(button_frame, text="Delete", command=delete_selected_tool, width=15).grid(row=2, column=0, pady=5)
+    tk.Label(button_frame, text="Backspace").grid(row=2, column=1)
+
+
 
     tool_type_dropdown.bind("<<ComboboxSelected>>", update_fields)
     update_fields()
     keybinds.bind_key(app, "<Return>", submit)
+    tree.bind("e", edit_selected_tool)
+    tree.bind("<BackSpace>", delete_selected_tool)
+    tree.bind("<Delete>", delete_selected_tool)
+
+
     tool_type_dropdown.focus_set()
