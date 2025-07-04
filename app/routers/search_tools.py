@@ -2,8 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..db import get_db
 from .. import models, schemas
+from ..auth import verify_api_key
 
-router = APIRouter(prefix="/search_tools", tags=["Search tools"])
+router = APIRouter(
+    prefix="/search_tools",
+    dependencies=[Depends(verify_api_key)],
+    tags=["Search tools"]
+)
 
 @router.post("/", response_model=list[int])
 def search_tools(filters: schemas.SearchTools, db: Session = Depends(get_db)):

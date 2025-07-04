@@ -3,11 +3,15 @@ from sqlalchemy.orm import Session
 from ..models import Material
 from ..db import get_db
 from .. import schemas
+from ..auth import verify_api_key
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/materials",
+    dependencies=[Depends(verify_api_key)]
+)
 
 # Get all materials
-@router.get("/materials/")
+@router.get("/")
 def get_materials(db: Session = Depends(get_db)):
     materials = db.query(Material).all()
     return [
@@ -16,7 +20,7 @@ def get_materials(db: Session = Depends(get_db)):
     ]
 
 # Create new material
-@router.post("/materials/")
+@router.post("/")
 def create_material(material: schemas.MaterialCreate, db: Session = Depends(get_db)):
     existing = db.query(Material).filter_by(name=material.name).first()
     if existing:
@@ -30,7 +34,7 @@ def create_material(material: schemas.MaterialCreate, db: Session = Depends(get_
 
 
 # Delete material
-@router.delete("/materials/{material_id}")
+@router.delete("/{material_id}")
 def delete_material(material_id: int, db: Session = Depends(get_db)):
     material = db.query(Material).filter_by(id=material_id).first()
     if not material:

@@ -58,7 +58,7 @@ def show_recipe_form(app):
         filtered_tool_map = {t["name"]: t["id"] for t in tools_for_strategy}
 
         tool_keys = list(filtered_tool_map.keys())
-        tool_var.set(tool_keys[0])
+        if tool_keys: tool_var.set(tool_keys[0])
         tool_menu["values"] = tool_keys
 
         app._current_tool_map = filtered_tool_map
@@ -119,8 +119,8 @@ def show_recipe_form(app):
         else:
             app.set_status(f"Error {response.status_code}")
 
-
-    tk.Button(app.content_frame, text="Submit", command=submit).grid(row=100, column=0, columnspan=2, pady=20)
+    print("hello from debug")
+    tk.Button(app.content_frame, text="Submit", command=submit).grid(row=0, column=3, pady=20)
 
     keybinds.bind_key(app, "<Return>", submit)
     material_menu.focus_set()

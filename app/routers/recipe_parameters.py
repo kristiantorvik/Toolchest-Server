@@ -4,8 +4,11 @@ from typing import List
 from .. import models
 from .. import schemas
 from ..db import get_db
+from ..auth import verify_api_key
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(verify_api_key)]
+)
 
 @router.get("/recipe_parameters/")
 def get_recipe_parameters(db: Session = Depends(get_db)):

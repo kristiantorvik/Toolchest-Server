@@ -2,8 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..db import get_db
 from .. import models, schemas
+from ..auth import verify_api_key
 
-router = APIRouter(prefix="/search", tags=["Search"])
+router = APIRouter(
+    prefix="/search",
+    dependencies=[Depends(verify_api_key)],
+    tags=["Search"]
+)
 
 @router.get("/options/{strategy_id}")
 def get_search_options(strategy_id: int, db: Session = Depends(get_db)):

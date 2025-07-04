@@ -3,8 +3,11 @@ from sqlalchemy.orm import Session
 from .. import models
 from ..db import get_db
 from .. import schemas
+from ..auth import verify_api_key
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(verify_api_key)]
+)
 
 @router.get("/strategies/")
 def get_strategies(db: Session = Depends(get_db)):

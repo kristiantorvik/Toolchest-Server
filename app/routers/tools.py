@@ -3,8 +3,11 @@ from sqlalchemy.orm import Session
 from typing import List
 from .. import models, schemas
 from ..db import get_db
+from ..auth import verify_api_key
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(verify_api_key)]
+)
 
 
 @router.get("/tools/")

@@ -2,8 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from .. import models
 from ..db import get_db
+from ..auth import verify_api_key
 
-router = APIRouter()
+router = APIRouter(
+    dependencies=[Depends(verify_api_key)]
+)
 
 @router.post("/tools/{tool_id}/parameters")
 def update_tool_parameter_values(tool_id: int, parameters: dict, db: Session = Depends(get_db)):
