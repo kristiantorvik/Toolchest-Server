@@ -90,6 +90,7 @@ def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"detail": "Recipe deleted"}
 
+
 @router.get("/recipes_by_tool/{tool_id}")
 def recipe_by_tool(tool_id: int, db: Session = Depends(get_db)):
     tool = db.query(models.Tool).filter(models.Tool.id == tool_id).first()
@@ -101,3 +102,14 @@ def recipe_by_tool(tool_id: int, db: Session = Depends(get_db)):
     recipe_ids = [r.id for r in recipes.all()]
     return recipe_ids
 
+
+@router.get("/recipes_by_material/{material_id}")
+def recipe_by_material(material_id: int, db: Session = Depends(get_db)):
+    material = db.query(models.Material).filter(models.Material.id == material_id).first()
+    if not material:
+        return None
+    recipes = db.query(models.Recipe).filter(models.Recipe.material_id_id == material.id)
+    if not recipes:
+        return None
+    recipe_ids = [r.id for r in recipes.all()]
+    return recipe_ids

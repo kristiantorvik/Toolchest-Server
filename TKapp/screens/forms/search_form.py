@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from api import fetch, post
+from api import fetch, post, delete
 import tkinter.font as tkfont
 from helper_func import keybinds
 
@@ -30,8 +30,11 @@ def show_search_form(app):
 
     strategy_dropdown['values'] = strategy_keys
 
+    button_frame = tk.Frame(app.content_frame, padx=20)
+    button_frame.grid(row=0, column=1, sticky="W")
+
     listbox_frame = tk.Frame(app.content_frame)
-    listbox_frame.grid(row=1, column=0, sticky='NEW', pady=10)
+    listbox_frame.grid(row=1, column=0, sticky='NEW', pady=10, columnspan=2)
 
     material_frame = tk.Frame(listbox_frame)
     material_frame.grid(row=0, column=0, padx=10, pady=5)
@@ -53,7 +56,7 @@ def show_search_form(app):
     tool_listbox.grid(row=1, column=0)
 
     treeview_frame = tk.Frame(app.content_frame, width=1)
-    treeview_frame.grid(row=3, column=0, sticky='NW', padx=5, pady=5)
+    treeview_frame.grid(row=3, column=0, sticky='NW', padx=5, pady=5, columnspan=2)
 
 
     filters = {}
@@ -160,8 +163,41 @@ def show_search_form(app):
             tree.column(column=col, width=max_width + 10, stretch=False)
 
 
+    def edit_selected_recipe(*args):
+        print("hello from debug")
 
-    tk.Button(strategy_frame, text="Search", command=submit).grid(row=0, column=2, padx=20)
+    def delete_selected_recipe(*args):
+        recipes_to_delete = []
+        selected_rows = tree.selection()  # Returns a tuple of selected item IDs
+
+        for row in selected_rows:
+            item_data = tree.item(row)  # Returns a dictionary of attributes
+            recipes_to_delete.append(item_data['values'][0])
+
+        if not recipes_to_delete:
+            return
+        
+        ok = messagebox.askokcancel("Confirm delete!", f"Permanently delete:{recipes_to_delete}\nThis cannot be undone")
+        if not ok:
+            return
+
+        for recipe_id in recipes_to_delete:      
+            print(recipe_id)      
+            response = delete(f"/recipes/{recipe_id}")
+
+            if response:
+                app.set_status(f"Deleted recipe {recipe_id}")
+                submit()
+            else: app.set_status(f"Error when deleting tool {recipe_id}")
+
+
+    tk.Button(button_frame, text="Search", command=submit, width=15).grid(row=0, column=0, pady=5, sticky="W")
+    tk.Label(button_frame, text="Enter").grid(row=0, column=1, sticky="W")
+    tk.Button(button_frame, text="Edit", command=edit_selected_recipe, width=15).grid(row=1, column=0, pady=5, sticky="W")
+    tk.Label(button_frame, text="E").grid(row=1, column=1, sticky="W")
+    tk.Button(button_frame, text="Delete", command=delete_selected_recipe, width=15).grid(row=2, column=0, pady=5, sticky="W")
+    tk.Label(button_frame, text="Backspace").grid(row=2, column=1, sticky="W")
+
 
     tree = ttk.Treeview(treeview_frame, columns=("ID",), show='headings')
     scrollbar = ttk.Scrollbar(treeview_frame, orient="vertical", command=tree.yview)
@@ -175,6 +211,12 @@ def show_search_form(app):
     
     strategy_dropdown.bind("<<ComboboxSelected>>", populate_filters)
     populate_filters()
+    keybinds.bind_key(app, "<Return>", submit)
+    tree.bind("e", edit_selected_recipe)
+    tree.bind("<BackSpace>", delete_selected_recipe)
+    tree.bind("<Delete>", delete_selected_recipe)
+    tree.bind("<d", delete_selected_recipe)
+
 
     keybinds.bind_key(app, "<Return>", submit)
     strategy_dropdown.focus_set()

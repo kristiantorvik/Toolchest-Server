@@ -19,6 +19,15 @@ def get_materials(db: Session = Depends(get_db)):
         for m in materials
     ]
 
+# Get single material
+@router.get("/by_id/{material_id}")
+def get_materials_by_id(material_id: int, db: Session = Depends(get_db)):
+    material = db.query(Material).filter_by(id = material_id).first()
+    if not material:
+        raise HTTPException(status_code=404, detail="Material not found")
+    return {"id": material.id, "name": material.name, "comment": material.comment}
+
+
 # Create new material
 @router.post("/")
 def create_material(material: schemas.MaterialCreate, db: Session = Depends(get_db)):
@@ -43,3 +52,16 @@ def delete_material(material_id: int, db: Session = Depends(get_db)):
     db.delete(material)
     db.commit()
     return {"detail": "Material deleted."}
+
+# Patch material
+@router.patch("/")
+def update_material(update: schemas.MaterialPatch, db: Session = Depends(get_db)):
+    material = db.query(Material).filter(Material.id == update.id).first()
+    if not material:
+        raise HTTPException(status_code=404, detail="Material not found.")
+
+    material.name = update.name
+    material.comment = update.comment
+
+    db.commit()
+    return {"detail": "Material updated."}

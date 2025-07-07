@@ -4,6 +4,7 @@ from tkinter import messagebox
 from api import fetch, post, delete
 import tkinter.font as tkfont
 from helper_func import keybinds
+from screens.forms import edit_tool_form
 
 def show_tool_search_form(app):
     keybinds.unbind_all(app)
@@ -117,8 +118,10 @@ def show_tool_search_form(app):
 
         for tid in tool_ids:
             data = fetch(f"/tool_detail/{tid}")
+            print(data)
             tool_details.append(data)
             used_param_keys.update(data["parameters"].keys())
+            print(used_param_keys)
 
         used_param_keys = [name for name in all_param_keys if name in used_param_keys]
         return used_param_keys, tool_details
@@ -187,7 +190,8 @@ def show_tool_search_form(app):
         selected_rows = tree.selection()  # Returns a tuple of selected item IDs
         if len(selected_rows) == 1:
             item_data = tree.item(selected_rows[0])  # Returns a dictionary of attributes for first item
-            print("Selected values:", item_data["values"][0])
+            id = item_data["values"][0]
+            edit_tool_form.show_edit_tool_form(app, tool_id = id)
         elif len(selected_rows) > 1:
             app.set_status("Select only one entry to edit")
             return
@@ -205,7 +209,6 @@ def show_tool_search_form(app):
         
         ok = messagebox.askokcancel("Confirm delete!", f"Permanently delete:{tools_to_delete}\nThis cannot be undone")
         if not ok:
-            print("ldkøfjalds")
             return
 
         for tool_id in tools_to_delete:
@@ -216,7 +219,6 @@ def show_tool_search_form(app):
             else: ok = True
 
             if not ok:
-                print("not ok")
                 return
             
             response = delete(f"/tool/{tool_id}")
@@ -243,6 +245,7 @@ def show_tool_search_form(app):
     tree.bind("e", edit_selected_tool)
     tree.bind("<BackSpace>", delete_selected_tool)
     tree.bind("<Delete>", delete_selected_tool)
+    tree.bind("d", delete_selected_tool)
 
 
     tool_type_dropdown.focus_set()

@@ -68,6 +68,7 @@ def get_tool_detail(tool_id: int, db: Session = Depends(get_db)):
     return {
         "id": tool.id,
         "name": tool.name,
+        "tool_type_id": tool.tool_type_id,
         "parameters": parameter_map,
     }
 

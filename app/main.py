@@ -4,7 +4,7 @@ from .routers import materials, recipe_parameter_values, recipe_parameters, reci
 from .parameter_sync import sync_parameters_from_config
 import os
 
-DB_PATH = "toolchest.db"
+DB_PATH = "data/toolchest.db"
 TOOL_PARAM_CONFIG = "app/tool_parameter_config.yaml"
 RECIPE_PARAM_CONFIG = "app/recipe_parameter_config.yaml"
 

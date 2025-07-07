@@ -69,6 +69,9 @@ class MaterialCreate(MaterialBase):
 class MaterialRead(MaterialBase):
     id: int
 
+class MaterialPatch(MaterialBase):
+    id: int
+
 # ------------------- Tool Types -------------------
 
 class ToolTypeBase(BaseModel):
@@ -107,6 +110,11 @@ class ToolCreate(ToolBase):
 
 class ToolRead(ToolBase):
     id: int
+
+class ToolPatch(BaseModel):
+    id: int
+    name: str
+    parameters: Dict[str, Union[float, int, str]]
 
 # ------------------- Recipes -------------------
 

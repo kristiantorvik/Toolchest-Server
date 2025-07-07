@@ -5,3 +5,7 @@ __pycache__/
 *.pyd
 *.sqlite3
 .env
+.db
+TKapp/build/
+TKapp/dist/
+TKapp/main.spec

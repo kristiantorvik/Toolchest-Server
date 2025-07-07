@@ -1,10 +1,10 @@
 import requests
 
 # Local URL
-# API_URL = "http://127.0.0.1:8000"
+API_URL = "http://127.0.0.1:8000"
 
 # Fly.io URL
-API_URL = "https://toolchestserver.fly.dev/"
+# API_URL = "https://toolchestserver.fly.dev/"
 API_KEY = "mysupersecretpasscode"
 
 def fetch(endpoint):
@@ -23,3 +23,8 @@ def delete(endpoint):
         f"{API_URL}/{endpoint}",
         headers={"x-api-key": API_KEY})
     return response.json() if response.status_code == 200 else []
+
+def patch(endpoint, data):
+    headers = {"x-api-key": API_KEY, 'Content-Type': 'application/json'}
+    response = requests.patch(f"{API_URL}/{endpoint}", json=data, headers=headers)
+    return response

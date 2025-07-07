@@ -1,5 +1,3 @@
-# from main import app
-
 class __keybinding:
     def __init__(self):
         self.bindings = []

@@ -37,7 +37,7 @@ def create_tool(tool_data: schemas.ToolCreate, db: Session = Depends(get_db)):
     for param_name, value in tool_data.parameters.items():
         param_obj = db.query(models.ToolParameter).filter_by(name=param_name).first()
         if not param_obj:
-            continue  # Optionally raise an error if parameter is not found
+            raise HTTPException(status_code=400, detail="Tool parameter not found")
 
         param_value = models.ToolParameterValue(
             tool_id=tool.id,
@@ -105,3 +105,62 @@ def get_tools_by_strategy(strategy_id: int, db: Session = Depends(get_db)):
         })
 
     return result
+
+
+@router.patch("/tool/")
+def edit_tool(update: schemas.ToolPatch, db: Session = Depends(get_db)):
+    # Validate tool exists
+    tool = db.query(models.Tool).filter_by(id = update.id).first()
+    if not tool:
+        raise HTTPException(status_code=400, detail="Tool not found")
+
+    # Update name of tool
+    tool.name = update.name
+
+    # Update parameter values
+    for param_id, value in update.parameters.items():
+        param_obj = db.query(models.ToolParameter).filter_by(id=param_id).first()
+        if not param_obj:
+            raise HTTPException(status_code=400, detail=f"Tool parameter ID:{param_id} not found")
+        
+        # Checking if parameter was used
+        used_param = db.query(models.ToolParameterValue).filter_by(tool_id = update.id, parameter_id = param_id).first()
+        if used_param:
+            if value == "":
+                db.delete(used_param)
+
+            p_type = param_obj.type
+            if p_type == "string":
+                used_param.value_str = value
+                used_param.value_int = None
+                used_param.value_float = None
+
+            elif p_type == "int":
+                used_param.value_str = None
+                used_param.value_int = value
+                used_param.value_float = None
+
+            elif p_type == "float":
+                used_param.value_str = None
+                used_param.value_int = None
+                used_param.value_float = value
+
+            else: raise HTTPException(status_code=426, detail=f"Invalid parameter type:{param_obj.type}")
+        
+        else:
+            if value == "":
+                print(f"passing {param_id}")
+                pass
+            else:
+                param_value = models.ToolParameterValue(
+                tool_id=tool.id,
+                parameter_id=param_obj.id,
+                value_float=value if param_obj.type == "float" else None,
+                value_int=value if param_obj.type == "int" else None,
+                value_str=value if param_obj.type == "string" else None
+                )
+                db.add(param_value)
+
+    db.commit()
+
+    return
