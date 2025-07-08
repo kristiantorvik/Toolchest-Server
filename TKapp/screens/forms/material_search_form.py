@@ -35,8 +35,8 @@ def show_material_search_form(app):
 
         materials = fetch("/materials/")
         if not materials:
-            app.set_status("Found no materials in DB")
             app.show_home()
+            app.set_status("Found no materials in DB")
             return
 
         empty_treeview()

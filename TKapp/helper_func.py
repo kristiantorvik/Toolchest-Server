@@ -14,3 +14,26 @@ class __keybinding:
         self.bindings.clear()
 
 keybinds = __keybinding()
+
+class __validation:
+    def __init__(self):
+        pass
+
+    def check_input(self, value, ptype):
+        if ptype == "int":
+            try: val = int(value)
+            except ValueError:
+                return None, False
+            except Exception as e:
+                return None, False
+
+        elif ptype == "float":
+            try: val = float(value)
+            except ValueError:
+                return None, False
+            except Exception as e:
+                return None, False
+        else: val = value
+        return val, True
+
+validate = __validation()

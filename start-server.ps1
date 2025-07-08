@@ -1,5 +1,5 @@
 # Navigate to project directory
-cd "C:\Users\Kristian\Documents\Toolchest-server"
+Set-Location -LiteralPath $PSScriptRoot
 
 # Activate virtual environment
 & .\venv\Scripts\Activate.ps1

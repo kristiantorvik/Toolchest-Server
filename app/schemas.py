@@ -29,6 +29,27 @@ class ToolParameterValueRead(ToolParameterValueBase):
     id: int
     tool_id: int
 
+
+# ------------------- Recipes -------------------
+
+class RecipeBase(BaseModel):
+    material_id: int
+    strategy_id: int
+    tool_id: int
+
+class RecipeCreate(RecipeBase):
+    parameters: Dict[str, Union[int, float, str]]
+
+class RecipeRead(RecipeBase):
+    id: int
+
+class RecipePatch(BaseModel):
+    id: int
+    material_id: int
+    strategy_id: int
+    tool_id: int
+    parameters: Dict[str, Union[int, float, str]]
+
 # ------------------- Recipe Parameters -------------------
 
 class RecipeParameterBase(BaseModel):
@@ -115,19 +136,6 @@ class ToolPatch(BaseModel):
     id: int
     name: str
     parameters: Dict[str, Union[float, int, str]]
-
-# ------------------- Recipes -------------------
-
-class RecipeBase(BaseModel):
-    material_id: int
-    strategy_id: int
-    tool_id: int
-
-class RecipeCreate(RecipeBase):
-    parameters: Dict[str, Union[int, float, str]]
-
-class RecipeRead(RecipeBase):
-    id: int
 
 # ------------------- Linking Tables -------------------
 

@@ -9,12 +9,13 @@ from screens.forms import edit_tool_form
 def show_tool_search_form(app):
     keybinds.unbind_all(app)
     app.operation_label.config(text="Search Tools")
+    app.set_status("")
     app.clear_content()
 
     tool_types = fetch("tool_types/")
     if not tool_types:
-        app.set_status("No tool types in DB")
         app.show_home()
+        app.set_status("No tool types in DB")
         return
     
     
@@ -118,10 +119,8 @@ def show_tool_search_form(app):
 
         for tid in tool_ids:
             data = fetch(f"/tool_detail/{tid}")
-            print(data)
             tool_details.append(data)
             used_param_keys.update(data["parameters"].keys())
-            print(used_param_keys)
 
         used_param_keys = [name for name in all_param_keys if name in used_param_keys]
         return used_param_keys, tool_details

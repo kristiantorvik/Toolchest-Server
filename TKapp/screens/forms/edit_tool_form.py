@@ -1,6 +1,6 @@
 import tkinter as tk
 from api import fetch, patch
-from helper_func import keybinds
+from helper_func import keybinds, validate
 
 def show_edit_tool_form(app, **kwargs):
     keybinds.unbind_all(app)
@@ -79,27 +79,6 @@ def show_edit_tool_form(app, **kwargs):
 
     tool_id.trace_add(mode='write', callback=update_fields)
 
-    def check_input(value, ptype):
-        if ptype == "int":
-            try: val = int(value)
-            except ValueError:
-                app.set_status("Invalid input")
-                return None
-            except Exception as e:
-                app.set_status(f"Unknown error: {e}")
-                return None
-
-        elif ptype == "float":
-            try: val = float(value)
-            except ValueError:
-                app.set_status("Invalid input")
-                return None
-            except Exception as e:
-                app.set_status(f"Unknown error: {e}")
-                return None
-        else:
-            val = value
-        return val
 
 
     def submit(*args):
@@ -110,20 +89,24 @@ def show_edit_tool_form(app, **kwargs):
         }
 
         for pname, info in dynamic_fields.items():
-            value = info['entry'].get()
+            value = info['entry'].get().strip()
             ptype = info['type']
             id = info['id']
 
             if value == "": pass
-            else: value = check_input(value, ptype)
+            else:
+                value, ok = validate.check_input(value, ptype)
+                if not ok: 
+                    app.set_status("Invalid inputs")
+                    return
                 
             tool_data['parameters'][id] = value
 
 
         response = patch("/tool/", tool_data)
         if response.status_code == 200:
-            app.set_status("Tool added!")
             app.show_home()
+            app.set_status("Tool added!")
         else:
             app.set_status(f"Error {response.status_code}")
 

@@ -111,8 +111,8 @@ def get_tools_by_strategy(strategy_id: int, db: Session = Depends(get_db)):
 def edit_tool(update: schemas.ToolPatch, db: Session = Depends(get_db)):
     # Validate tool exists
     tool = db.query(models.Tool).filter_by(id = update.id).first()
-    if not tool:
-        raise HTTPException(status_code=400, detail="Tool not found")
+    if not tool: raise HTTPException(status_code=400, detail="Tool not found")
+        
 
     # Update name of tool
     tool.name = update.name

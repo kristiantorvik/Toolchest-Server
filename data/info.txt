@@ -1,2 +1,2 @@
 This is where the database file will be created if there is not already one here.
-The database file should be named toolchest.database
+The database file should be named toolchest.db

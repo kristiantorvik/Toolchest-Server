@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from api import fetch, post
-from helper_func import keybinds
+from helper_func import keybinds, validate
 
 def show_recipe_form(app):
     keybinds.unbind_all(app)
@@ -14,8 +14,8 @@ def show_recipe_form(app):
     tools = fetch("tools/")
 
     if not materials or not strategies or not tools:
-        app.set_status("Please create Materials, Strategies, and Tools first!")
         app.show_home()
+        app.set_status("Please create Materials, Strategies, and Tools first!")
         return
 
     # Build maps
@@ -52,6 +52,7 @@ def show_recipe_form(app):
     def update_after_strategy(*args):
         selected_strategy = strategy_var.get()
         strategy_id = strategy_map[selected_strategy]["id"]
+        tool_var.set("")
 
         # Update tool list filtered by strategy
         tools_for_strategy = fetch(f"tools/by_strategy/{strategy_id}")
@@ -61,7 +62,8 @@ def show_recipe_form(app):
         if tool_keys: tool_var.set(tool_keys[0])
         tool_menu["values"] = tool_keys
 
-        app._current_tool_map = filtered_tool_map
+        nonlocal tool_map
+        tool_map = filtered_tool_map
 
         # Clear old dynamic fields
         for widget in dynamic_fields.values():
@@ -74,14 +76,15 @@ def show_recipe_form(app):
         for idx, param in enumerate(parameters):
             pname = param["name"]
             ptype = param["type"]
+            id = param["id"]
 
             label = tk.Label(app.content_frame, text=f"{pname} ({ptype}):")
             label.grid(row=3+idx, column=0)
             entry = tk.Entry(app.content_frame)
             entry.grid(row=3+idx, column=1)
-            dynamic_fields[pname] = {"label": label, "entry": entry, "type": ptype}
+            dynamic_fields[pname] = {"label": label, "entry": entry, "type": ptype, "id": id}
 
-    strategy_var.trace("w", update_after_strategy)
+    strategy_var.trace_add(mode="write", callback=update_after_strategy)
 
     # Initial trigger
     update_after_strategy()
@@ -90,36 +93,30 @@ def show_recipe_form(app):
         data = {
             "material_id": material_map[material_var.get()],
             "strategy_id": strategy_map[strategy_var.get()]["id"],
-            "tool_id": app._current_tool_map[tool_var.get()],
+            "tool_id": tool_map[tool_var.get()],
             "parameters": {}
         }
-        for pname, field in dynamic_fields.items():
-            val = field["entry"].get().strip()
-            ptype = field["type"]
+        for pname, info in dynamic_fields.items():
+            value = info["entry"].get().strip()
+            ptype = info["type"]
+            id = info["id"]
 
-            if val == "":
-                continue  # Skip empty values
+            if value == "": pass
+            else:
+                value, ok = validate.check_input(value, ptype)
+                if not ok: 
+                    app.set_status("Invalid inputs")
+                    return
 
-            try:
-                if ptype == "int":
-                    val = int(val)
-                elif ptype == "float":
-                    val = float(val)
-                # No conversion needed for "str"
-            except ValueError:
-                app.set_status(f"Invalid input for parameter '{pname}'")
-                return
-
-            data["parameters"][pname] = val
-
-        response = post("recipes/", data)
+            data["parameters"][id] = value
+        print(data)
+        response = post("/recipes/", data)
         if response.status_code == 200:
-            app.set_status("Recipe Added!")
             app.show_home()
+            app.set_status("Recipe Added!")
         else:
             app.set_status(f"Error {response.status_code}")
 
-    print("hello from debug")
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=0, column=3, pady=20)
 
     keybinds.bind_key(app, "<Return>", submit)

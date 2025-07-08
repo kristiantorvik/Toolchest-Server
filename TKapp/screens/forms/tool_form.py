@@ -1,6 +1,6 @@
 import tkinter as tk
 from api import fetch, post
-from helper_func import keybinds
+from helper_func import keybinds, validate
 
 
 def show_tool_form(app):
@@ -11,8 +11,8 @@ def show_tool_form(app):
     # Load tool types
     tooltypes = fetch("tool_types/")
     if not tooltypes:
-        app.set_status("Please create Tool Types first!")
         app.show_home()
+        app.set_status("Please create Tool Types first!")
         return
 
     tooltype_map = {t["name"]: t for t in tooltypes}
@@ -59,23 +59,21 @@ def show_tool_form(app):
         }
 
         for pname, info in dynamic_fields.items():
-            raw = info["entry"].get()
+            value = info["entry"].get()
             ptype = info["type"]
-            if raw == "":
-                continue
-            if ptype == "int":
-                val = int(raw)
-            elif ptype == "float":
-                val = float(raw)
+            if value == "": pass
             else:
-                val = raw
-            tool_data["parameters"][pname] = val
-        print(tool_data)
+                value, ok = validate.check_input(value, ptype)
+                if not ok: 
+                    app.set_status("Invalid inputs")
+                    return
+
+            tool_data["parameters"][pname] = value
 
         response = post("tools/", tool_data)
         if response.status_code == 200:
-            app.set_status("Tool added!")
             app.show_home()
+            app.set_status("Tool added!")
         else:
             app.set_status(f"Error {response.status_code}")
 

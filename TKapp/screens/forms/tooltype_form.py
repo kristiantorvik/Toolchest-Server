@@ -47,8 +47,8 @@ def show_tooltype_form(app):
 
         response = post("tool_types/", data)
         if response.ok:
-            app.set_status("Tool Type added successfully!")
             app.show_home()
+            app.set_status("Tool Type added successfully!")
         else:
             app.set_status(f"Error: {response.status_code}")
 

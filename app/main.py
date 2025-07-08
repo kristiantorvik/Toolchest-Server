@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from .db import engine, Base, SessionLocal
-from .routers import materials, recipe_parameter_values, recipe_parameters, recipes, strategies, tool_parameter_values, tool_parameters, tool_types, tools, search, search_tools
+from .routers import materials, recipe_parameters, recipes, strategies, tool_parameter_values, tool_parameters, tool_types, tools, search, search_tools
 from .parameter_sync import sync_parameters_from_config
 import os
 
@@ -23,7 +23,6 @@ app = FastAPI()
 
 # Register routers
 app.include_router(materials.router)
-app.include_router(recipe_parameter_values.router)
 app.include_router(recipe_parameters.router)
 app.include_router(recipes.router)
 app.include_router(strategies.router)

@@ -10,8 +10,8 @@ def show_strategy_form(app):
 
     parameters = fetch("/recipe_parameters/")
     if not parameters:
-        app.set_status("No Recipe Parameters defined. Define them first.")
         app.show_home()
+        app.set_status("No Recipe Parameters defined. Define them first.")
         return
 
     tk.Label(app.content_frame, text="Strategy Name:").grid(row=0, column=0, sticky="w")
@@ -62,8 +62,8 @@ def show_strategy_form(app):
 
         response = post("/strategies/", payload)
         if response.status_code == 200:
-            app.set_status("Strategy added successfully.")
             app.show_home()
+            app.set_status("Strategy added successfully.")
         else:
             messagebox.showerror("Error", f"Failed to add strategy: {response.status_code}")
 

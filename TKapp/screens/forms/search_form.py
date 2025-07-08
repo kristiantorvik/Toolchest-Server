@@ -4,6 +4,7 @@ from tkinter import messagebox
 from api import fetch, post, delete
 import tkinter.font as tkfont
 from helper_func import keybinds
+from screens.forms import edit_recipe_form
 
 def show_search_form(app):
     keybinds.unbind_all(app)
@@ -12,8 +13,8 @@ def show_search_form(app):
 
     strategies = fetch("/strategies/")
     if not strategies:
-        app.set_status("No recipes in DB")
         app.show_home()
+        app.set_status("No recipes in DB")
         return
     
     stragegy_map = {t["name"]: t for t in strategies}
@@ -116,7 +117,7 @@ def show_search_form(app):
         if not recipe_ids:
             app.set_status("Found no matching recipe in DB")
         else:
-            app.set_status(f"Found {len(recipe_ids)} matching tools")
+            app.set_status(f"Found {len(recipe_ids)} matching recipes")
 
 
         # Fetch all recipe details and collect their parameter keys
@@ -164,7 +165,15 @@ def show_search_form(app):
 
 
     def edit_selected_recipe(*args):
-        print("hello from debug")
+        selected_rows = tree.selection()  # Returns a tuple of selected item IDs
+        if len(selected_rows) == 1:
+            item_data = tree.item(selected_rows[0])  # Returns a dictionary of attributes for first item
+            id = item_data["values"][0]
+            edit_recipe_form.show_edit_recipe_form(app, recipe_id = id)
+
+        elif len(selected_rows) > 1:
+            app.set_status("Select only one entry to edit")
+            return
 
     def delete_selected_recipe(*args):
         recipes_to_delete = []
@@ -215,7 +224,7 @@ def show_search_form(app):
     tree.bind("e", edit_selected_recipe)
     tree.bind("<BackSpace>", delete_selected_recipe)
     tree.bind("<Delete>", delete_selected_recipe)
-    tree.bind("<d", delete_selected_recipe)
+    tree.bind("d", delete_selected_recipe)
 
 
     keybinds.bind_key(app, "<Return>", submit)

@@ -1,6 +1,6 @@
 import ctypes
 import tkinter as tk
-from screens import home
+from screens import home, info
 from helper_func import keybinds
 
 class ToolChestApp:
@@ -8,10 +8,12 @@ class ToolChestApp:
         self.root = root
         self.enable_dark_titlebar(root)
         self.root.title("ToolChest Server")
-        self.root.geometry("1000x600")
+        self.root.geometry("800x600")
         self.create_layout()
         self.show_home()
         root.bind("<Escape>", self.show_home)
+        root.bind("Q", self.kill_bill)
+
         
         # Set the window icon
         try:
@@ -33,6 +35,9 @@ class ToolChestApp:
         self.home_button = tk.Button(self.top_frame, text="Home", command=self.show_home)
         self.home_button.pack(side=tk.RIGHT, padx=10)
 
+        self.info_button = tk.Button(self.top_frame, text="info", command=self.show_info)
+        self.info_button.pack(side=tk.RIGHT, padx=10)
+
         self.content_frame = tk.Frame(self.root)
         self.content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
@@ -50,6 +55,14 @@ class ToolChestApp:
         self.clear_content()
         keybinds.unbind_all(self)
         home.show_home(self)
+        self.set_status("")
+
+    def show_info(self):
+        info.show_home(self)
+
+
+    def kill_bill(self, *args):
+        root.destroy()
         
 
     def set_status(self, message):
