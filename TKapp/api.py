@@ -5,7 +5,7 @@ API_URL = "http://127.0.0.1:8000"
 
 # Fly.io URL
 # API_URL = "https://toolchestserver.fly.dev/"
-API_KEY = "mysupersecretpasscode"
+API_KEY = "1234"
 
 def fetch(endpoint):
     response = requests.get(

@@ -1,6 +1,7 @@
 import tkinter as tk
 from helper_func import keybinds
 
+
 def show_home(app):
     app.operation_label.config(text="INFO")
     app.clear_content()

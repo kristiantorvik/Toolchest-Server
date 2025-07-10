@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from fastapi import FastAPI
 from .db import engine, Base, SessionLocal
 from .routers import materials, recipe_parameters, recipes, strategies, tool_parameter_values, tool_parameters, tool_types, tools, search, search_tools
