@@ -61,10 +61,11 @@ def show_tool_form(app):
         for pname, info in dynamic_fields.items():
             value = info["entry"].get()
             ptype = info["type"]
-            if value == "": pass
+            if value == "":
+                pass
             else:
                 value, ok = validate.check_input(value, ptype)
-                if not ok: 
+                if not ok:
                     app.set_status("Invalid inputs")
                     return
 
@@ -80,5 +81,3 @@ def show_tool_form(app):
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=100, column=0, columnspan=2, pady=20)
     keybinds.bind_key(app, "<Return>", submit)
     name_entry.focus_set()
-
-

@@ -10,18 +10,19 @@ router = APIRouter(
     tags=["Search tools"]
 )
 
+
 @router.post("/", response_model=list[int])
 def search_tools(filters: schemas.SearchTools, db: Session = Depends(get_db)):
     query = db.query(models.Tool).filter_by(tool_type_id=filters.tool_type_id)
 
-    for param,value in filters.parameters.items():
+    for param, value in filters.parameters.items():
 
         tool_param_query = db.query(models.ToolParameter).filter_by(name=param).first()
         tool_param_id = tool_param_query.id
         param_type = tool_param_query.type
 
         param_value_query = db.query(models.ToolParameterValue).filter_by(parameter_id=tool_param_id)
-        
+
         if param_type == "int":
             param_value_query = param_value_query.filter_by(value_int=int(value))
         elif param_type == "float":

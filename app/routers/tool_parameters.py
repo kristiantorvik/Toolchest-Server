@@ -9,6 +9,7 @@ router = APIRouter(
     dependencies=[Depends(verify_api_key)]
 )
 
+
 @router.get("/tool_parameters/")
 def get_tool_parameters(db: Session = Depends(get_db)):
     parameters = db.query(models.ToolParameter).all()
@@ -20,6 +21,7 @@ def get_tool_parameters(db: Session = Depends(get_db)):
             "description": p.description
         } for p in parameters
     ]
+
 
 @router.get("/tool_parameters/by_tooltype/{tooltype_id}", response_model=List[schemas.ToolParameterRead])
 def tool_parameters_by_tooltype(tooltype_id: int, db: Session = Depends(get_db)):

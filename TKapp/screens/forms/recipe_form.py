@@ -3,6 +3,7 @@ from tkinter import ttk
 from api import fetch, post
 from helper_func import keybinds, validate
 
+
 def show_recipe_form(app):
     keybinds.unbind_all(app)
     app.operation_label.config(text="Add Recipe")
@@ -59,7 +60,9 @@ def show_recipe_form(app):
         filtered_tool_map = {t["name"]: t["id"] for t in tools_for_strategy}
 
         tool_keys = list(filtered_tool_map.keys())
-        if tool_keys: tool_var.set(tool_keys[0])
+        if tool_keys:
+            tool_var.set(tool_keys[0])
+
         tool_menu["values"] = tool_keys
 
         nonlocal tool_map
@@ -79,9 +82,9 @@ def show_recipe_form(app):
             id = param["id"]
 
             label = tk.Label(app.content_frame, text=f"{pname} ({ptype}):")
-            label.grid(row=3+idx, column=0)
+            label.grid(row=3 + idx, column=0)
             entry = tk.Entry(app.content_frame)
-            entry.grid(row=3+idx, column=1)
+            entry.grid(row=3 + idx, column=1)
             dynamic_fields[pname] = {"label": label, "entry": entry, "type": ptype, "id": id}
 
     strategy_var.trace_add(mode="write", callback=update_after_strategy)
@@ -101,10 +104,11 @@ def show_recipe_form(app):
             ptype = info["type"]
             id = info["id"]
 
-            if value == "": pass
+            if value == "":
+                pass
             else:
                 value, ok = validate.check_input(value, ptype)
-                if not ok: 
+                if not ok:
                     app.set_status("Invalid inputs")
                     return
 
@@ -121,4 +125,3 @@ def show_recipe_form(app):
 
     keybinds.bind_key(app, "<Return>", submit)
     material_menu.focus_set()
-

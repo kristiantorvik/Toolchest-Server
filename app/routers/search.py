@@ -10,10 +10,13 @@ router = APIRouter(
     tags=["Search"]
 )
 
+
 @router.get("/options/{strategy_id}")
 def get_search_options(strategy_id: int, db: Session = Depends(get_db)):
     # Get tool type links for the strategy
     tooltype_links = db.query(models.ToolTypeStrategyLink).filter_by(strategy_id=strategy_id).all()
+    if not tooltype_links:
+        return None
     tooltype_ids = [link.tooltype_id for link in tooltype_links]
 
     # Retrieve matching tool types
@@ -21,9 +24,13 @@ def get_search_options(strategy_id: int, db: Session = Depends(get_db)):
 
     # Retrieve tools that match the tool types
     tools = db.query(models.Tool).filter(models.Tool.tool_type_id.in_(tooltype_ids)).all()
+    if not tools:
+        return None
 
     # Retrieve all materials
     materials = db.query(models.Material).all()
+    if not materials:
+        return None
 
     return {
         "materials": [{"id": m.id, "name": m.name} for m in materials],
@@ -37,9 +44,6 @@ def get_search_options(strategy_id: int, db: Session = Depends(get_db)):
             for t in tools
         ],
     }
-
-
-
 
 
 @router.post("/", response_model=list[int])

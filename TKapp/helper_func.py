@@ -13,7 +13,9 @@ class __keybinding:
             # print(f"DEBUG: Removed keybind for {event_type}")
         self.bindings.clear()
 
+
 keybinds = __keybinding()
+
 
 class __validation:
     def __init__(self):
@@ -21,19 +23,24 @@ class __validation:
 
     def check_input(self, value, ptype):
         if ptype == "int":
-            try: val = int(value)
+            try:
+                val = int(value)
             except ValueError:
                 return None, False
-            except Exception as e:
+            except Exception:
                 return None, False
 
         elif ptype == "float":
-            try: val = float(value)
+            try:
+                val = float(value)
             except ValueError:
                 return None, False
-            except Exception as e:
+            except Exception:
                 return None, False
-        else: val = value
+        else:
+            val = value
         return val, True
 
+
 validate = __validation()
+

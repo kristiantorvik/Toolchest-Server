@@ -10,6 +10,7 @@ router = APIRouter(
     dependencies=[Depends(verify_api_key)]
 )
 
+
 # Get all materials
 @router.get("/")
 def get_materials(db: Session = Depends(get_db)):
@@ -19,10 +20,11 @@ def get_materials(db: Session = Depends(get_db)):
         for m in materials
     ]
 
+
 # Get single material
 @router.get("/by_id/{material_id}")
 def get_materials_by_id(material_id: int, db: Session = Depends(get_db)):
-    material = db.query(Material).filter_by(id = material_id).first()
+    material = db.query(Material).filter_by(id=material_id).first()
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
     return {"id": material.id, "name": material.name, "comment": material.comment}
@@ -52,6 +54,7 @@ def delete_material(material_id: int, db: Session = Depends(get_db)):
     db.delete(material)
     db.commit()
     return {"detail": "Material deleted."}
+
 
 # Patch material
 @router.patch("/")

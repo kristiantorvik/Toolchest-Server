@@ -2,6 +2,7 @@ import tkinter as tk
 from screens.forms import material_form, strategy_form, tooltype_form, tool_form, recipe_form, search_form, tool_search_form, edit_material_form, material_search_form, edit_tool_form, edit_recipe_form
 from helper_func import keybinds
 
+
 def show_home(app):
     keybinds.unbind_all(app)
     add_buttons = [
@@ -32,8 +33,8 @@ def show_home(app):
     tk.Label(add_frame, text="Add to DB").grid(row=0, column=0, columnspan=2)
 
     for idx, (text, command) in enumerate(add_buttons):
-        tk.Label(add_frame, text=f"{idx}").grid(row=idx+1, column=0)
-        tk.Button(add_frame, text=text, command=command, width=25, height=2).grid(row=idx+1, column=1, pady=10)
+        tk.Label(add_frame, text=f"{idx}").grid(row=idx + 1, column=0)
+        tk.Button(add_frame, text=text, command=command, width=25, height=2).grid(row=idx + 1, column=1, pady=10)
         keybinds.bind_key(app, f"{idx}", command)
 
 
@@ -42,9 +43,9 @@ def show_home(app):
     tk.Label(search_frame, text="Search DB").grid(row=0, column=0, columnspan=2)
 
     for idx, (text, command) in enumerate(search_buttons):
-        tk.Label(search_frame, text=f"{idx+len(add_buttons)}").grid(row=idx+1, column=0)
-        tk.Button(search_frame, text=text, command=command, width=25, height=2).grid(row=idx+1, column=1, pady=10)
-        keybinds.bind_key(app, f"{idx+len(add_buttons)}", command)
+        tk.Label(search_frame, text=f"{idx + len(add_buttons)}").grid(row=idx + 1, column=0)
+        tk.Button(search_frame, text=text, command=command, width=25, height=2).grid(row=idx + 1, column=1, pady=10)
+        keybinds.bind_key(app, f"{idx + len(add_buttons)}", command)
 
 
     edit_frame = tk.Frame(app.content_frame)
@@ -52,4 +53,4 @@ def show_home(app):
     tk.Label(edit_frame, text="Edit DB").grid(row=0, column=0)
 
     for idx, (text, command) in enumerate(edit_buttons):
-        tk.Button(edit_frame, text=text, command=command, width=25, height=2).grid(row=idx+1, column=0, pady=10)
+        tk.Button(edit_frame, text=text, command=command, width=25, height=2).grid(row=idx + 1, column=0, pady=10)

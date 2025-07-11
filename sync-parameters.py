@@ -3,10 +3,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.models import Base, ToolParameter, RecipeParameter
 
+
 # Load YAML configs
 def load_yaml(filename):
     with open(filename, 'r') as f:
         return yaml.safe_load(f)
+
 
 def sync_parameters(session):
     # --- Tool Parameters ---
@@ -36,6 +38,7 @@ def sync_parameters(session):
             print(f"Added recipe parameter: {param['name']}")
 
     session.commit()
+
 
 if __name__ == "__main__":
     DATABASE_URL = "sqlite:///toolchest.db"

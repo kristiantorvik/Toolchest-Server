@@ -2,6 +2,7 @@ import tkinter as tk
 from api import post
 from helper_func import keybinds
 
+
 def show_material_form(app):
     app.operation_label.config(text="Add Material")
     app.clear_content()

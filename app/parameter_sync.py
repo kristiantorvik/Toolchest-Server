@@ -2,9 +2,11 @@ import yaml
 from sqlalchemy.orm import Session
 from .models import ToolParameter, RecipeParameter
 
+
 def sync_parameters_from_config(tool_param_path: str, recipe_param_path: str, db: Session):
     sync_tool_parameters_from_yaml(db, tool_param_path)
     sync_recipe_parameters_from_yaml(db, recipe_param_path)
+
 
 def sync_tool_parameters_from_yaml(db: Session, yaml_path: str):
     with open(yaml_path, 'r') as f:
@@ -27,6 +29,7 @@ def sync_tool_parameters_from_yaml(db: Session, yaml_path: str):
             print(f"Added ToolParameter: {name}")
 
     db.commit()
+
 
 def sync_recipe_parameters_from_yaml(db: Session, yaml_path: str):
     with open(yaml_path, 'r') as f:

@@ -6,6 +6,7 @@ import tkinter.font as tkfont
 from helper_func import keybinds
 from screens.forms import edit_tool_form
 
+
 def show_tool_search_form(app):
     keybinds.unbind_all(app)
     app.operation_label.config(text="Search Tools")
@@ -17,8 +18,8 @@ def show_tool_search_form(app):
         app.show_home()
         app.set_status("No tool types in DB")
         return
-    
-    
+
+
     tool_type_map = {t["name"]: t for t in tool_types}
     tool_type_keys = list(tool_type_map.keys())
 
@@ -39,7 +40,6 @@ def show_tool_search_form(app):
     button_frame.grid(row=0, column=1, rowspan=2)
 
 
-    
     # Dynamic parameter fields
     dynamic_fields = {}
 
@@ -62,8 +62,6 @@ def show_tool_search_form(app):
             dynamic_fields[pname] = {"label": label, "entry": entry, "type": ptype}
 
         submit()
-
-    
 
 
 
@@ -97,7 +95,7 @@ def show_tool_search_form(app):
 
             filters["parameters"][pname] = val
         return filters
-    
+
 
     def empty_treeview():
         for row in tree.get_children():
@@ -107,7 +105,7 @@ def show_tool_search_form(app):
         for col in tree["columns"]:
             tree.heading(col, text="")
 
-    
+
     def get_tool_data(tool_type_id, tool_ids):
         tool_details = []
         used_param_keys = set()
@@ -115,7 +113,6 @@ def show_tool_search_form(app):
         all_parameters = fetch(f"tool_parameters/by_tooltype/{tool_type_id}")
         all_param_keys = ([param["name"] for param in all_parameters])
 
-        
 
         for tid in tool_ids:
             data = fetch(f"/tool_detail/{tid}")
@@ -125,14 +122,12 @@ def show_tool_search_form(app):
         used_param_keys = [name for name in all_param_keys if name in used_param_keys]
         return used_param_keys, tool_details
 
-    
+
 
     def submit(*args):
-        
         filters = get_filters()
 
         tool_ids = post("/search_tools/", filters).json()
-
 
         if not tool_ids:
             app.set_status("Found no matching tools in DB")
@@ -141,7 +136,7 @@ def show_tool_search_form(app):
 
         empty_treeview()
         selected_tooltype = tool_type_map[tool_type_var.get()]
-        used_param_keys, tool_details= get_tool_data(selected_tooltype['id'], tool_ids)
+        used_param_keys, tool_details = get_tool_data(selected_tooltype['id'], tool_ids)
 
         columns = ["id", "name"] + (used_param_keys)
 
@@ -155,7 +150,6 @@ def show_tool_search_form(app):
             row = [data["id"], data["name"]]
             row += [data["parameters"].get(k, "") for k in (used_param_keys)]
             tree.insert("", tk.END, values=row)
-
 
 
         # auto resice columns
@@ -190,11 +184,11 @@ def show_tool_search_form(app):
         if len(selected_rows) == 1:
             item_data = tree.item(selected_rows[0])  # Returns a dictionary of attributes for first item
             id = item_data["values"][0]
-            edit_tool_form.show_edit_tool_form(app, tool_id = id)
+            edit_tool_form.show_edit_tool_form(app, tool_id=id)
         elif len(selected_rows) > 1:
             app.set_status("Select only one entry to edit")
             return
-        
+
     def delete_selected_tool(*args):
         tools_to_delete = []
         selected_rows = tree.selection()  # Returns a tuple of selected item IDs
@@ -205,7 +199,7 @@ def show_tool_search_form(app):
 
         if not tools_to_delete:
             return
-        
+
         ok = messagebox.askokcancel("Confirm delete!", f"Permanently delete:{tools_to_delete}\nThis cannot be undone")
         if not ok:
             return
@@ -215,17 +209,18 @@ def show_tool_search_form(app):
             recipes = fetch(f"/recipes_by_tool/{tool_id}")
             if recipes:
                 ok = messagebox.askokcancel("Tool used!", f"Tool {tool_id} is used in recipes:\n{recipes}\nForce delete?\nThis will delete associated recipes.")
-            else: ok = True
+            else:
+                ok = True
 
             if not ok:
                 return
-            
+
             response = delete(f"/tool/{tool_id}")
             if response:
                 app.set_status(f"Deleted tool {tool_id}")
                 submit()
-            else: app.set_status(f"Error when deleting tool {tool_id}")
-        
+            else:
+                app.set_status(f"Error when deleting tool {tool_id}")
 
 
 
@@ -235,7 +230,6 @@ def show_tool_search_form(app):
     tk.Label(button_frame, text="E").grid(row=1, column=1)
     tk.Button(button_frame, text="Delete", command=delete_selected_tool, width=15).grid(row=2, column=0, pady=5)
     tk.Label(button_frame, text="Backspace").grid(row=2, column=1)
-
 
 
     tool_type_dropdown.bind("<<ComboboxSelected>>", update_fields)

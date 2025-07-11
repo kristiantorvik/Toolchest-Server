@@ -9,6 +9,7 @@ router = APIRouter(
     dependencies=[Depends(verify_api_key)]
 )
 
+
 @router.get("/strategies/")
 def get_strategies(db: Session = Depends(get_db)):
     strategies = db.query(models.Strategy).all()

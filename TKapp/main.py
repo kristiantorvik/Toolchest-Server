@@ -3,6 +3,7 @@ import tkinter as tk
 from screens import home, info
 from helper_func import keybinds
 
+
 class ToolChestApp:
     def __init__(self, root):
         self.root = root
@@ -14,7 +15,6 @@ class ToolChestApp:
         root.bind("<Escape>", self.show_home)
         root.bind("Q", self.kill_bill)
 
-        
         # Set the window icon
         try:
             root.iconbitmap("TKapp/ICON.ico")
@@ -63,7 +63,7 @@ class ToolChestApp:
 
     def kill_bill(self, *args):
         root.destroy()
-        
+
 
     def set_status(self, message):
         self.status_label.config(text=message)

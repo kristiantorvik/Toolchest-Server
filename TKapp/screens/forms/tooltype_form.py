@@ -55,4 +55,3 @@ def show_tooltype_form(app):
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=3, column=0, columnspan=2, pady=20)
     keybinds.bind_key(app, "<Return>", submit)
     name_entry.focus_set()
-

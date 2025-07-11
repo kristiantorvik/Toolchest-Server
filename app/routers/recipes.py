@@ -50,7 +50,8 @@ def create_recipe(data: schemas.RecipeCreate, db: Session = Depends(get_db)):
             parameter_id=param_obj.id
         )
 
-        if value == "": continue
+        if value == "":
+            continue
         try:
             if param_obj.type == "int":
                 value_entry.value_int = int(value)
@@ -62,15 +63,14 @@ def create_recipe(data: schemas.RecipeCreate, db: Session = Depends(get_db)):
                 raise HTTPException(status_code=400, detail=f"Unsupported parameter type: {param_obj.type}")
         except ValueError:
             raise HTTPException(status_code=422, detail=f"Could not convert value: '{value}' to correct type: {param_obj.type}")
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Unexpected error while converting values")
+        except Exception:
+            raise HTTPException(status_code=500, detail="Unexpected error while converting values")
 
         db.add(value_entry)
 
     db.commit()
 
     return {"detail": "Recipe Succesfully added"}
-
 
 
 @router.delete("/recipes/{recipe_id}")
@@ -82,7 +82,6 @@ def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     db.delete(recipe)
     db.commit()
     return {"detail": "Recipe deleted"}
-
 
 
 @router.get("/recipes_by_tool/{tool_id}")
@@ -97,7 +96,6 @@ def recipe_by_tool(tool_id: int, db: Session = Depends(get_db)):
     return recipe_ids
 
 
-
 @router.get("/recipes_by_material/{material_id}")
 def recipe_by_material(material_id: int, db: Session = Depends(get_db)):
     material = db.query(models.Material).filter(models.Material.id == material_id).first()
@@ -110,11 +108,11 @@ def recipe_by_material(material_id: int, db: Session = Depends(get_db)):
     return recipe_ids
 
 
-
 @router.patch("/recipe/")
 def update_recipe(update: schemas.RecipePatch, db: Session = Depends(get_db)):
-    recipe = db.query(models.Recipe).filter_by(id = update.id).first()
-    if not recipe: raise HTTPException(status_code=400, detail="Recipe not found")
+    recipe = db.query(models.Recipe).filter_by(id=update.id).first()
+    if not recipe:
+        raise HTTPException(status_code=400, detail="Recipe not found")
 
     check_recipe(update, db)
 
@@ -123,9 +121,9 @@ def update_recipe(update: schemas.RecipePatch, db: Session = Depends(get_db)):
         param_obj = db.query(models.RecipeParameter).filter_by(id=param_id).first()
         if not param_obj:
             raise HTTPException(status_code=400, detail=f"Tool parameter ID:{param_id} not found")
-        
+
         # Checking if parameter was used
-        used_param = db.query(models.RecipeParameterValue).filter_by(recipe_id = update.id, parameter_id = param_id).first()
+        used_param = db.query(models.RecipeParameterValue).filter_by(recipe_id=update.id, parameter_id=param_id).first()
         if used_param:
             if value == "":
                 db.delete(used_param)
@@ -150,25 +148,24 @@ def update_recipe(update: schemas.RecipePatch, db: Session = Depends(get_db)):
                     raise HTTPException(status_code=400, detail=f"Unsupported parameter type: {param_obj.type}")
             except ValueError:
                 raise HTTPException(status_code=422, detail=f"Could not convert value: '{value}' to correct type: {param_obj.type}")
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=f"Unexpected error while converting values")
-        
+            except Exception:
+                raise HTTPException(status_code=500, detail="Unexpected error while converting values")
+
         else:
             if value == "":
                 pass
             else:
                 param_value = models.RecipeParameterValue(
-                recipe_id=recipe.id,
-                parameter_id=param_obj.id,
-                value_float=value if param_obj.type == "float" else None,
-                value_int=value if param_obj.type == "int" else None,
-                value_str=value if param_obj.type == "string" else None
+                    recipe_id=recipe.id,
+                    parameter_id=param_obj.id,
+                    value_float=value if param_obj.type == "float" else None,
+                    value_int=value if param_obj.type == "int" else None,
+                    value_str=value if param_obj.type == "string" else None
                 )
                 db.add(param_value)
 
     db.commit()
     return {"detail": "Recipe Succsessfully updated"}
-
 
 
 def check_recipe(recipe, db):
@@ -182,29 +179,27 @@ def check_recipe(recipe, db):
         raise HTTPException(status_code=500, detail=f"Unknown error while processing parameter ids. Error: {e}")
 
 
-
-    strat_param_link = db.query(models.StrategyRecipeParameterLink).filter_by(strategy_id = recipe.strategy_id).all()
+    strat_param_link = db.query(models.StrategyRecipeParameterLink).filter_by(strategy_id=recipe.strategy_id).all()
     allowed_parameter_ids = [item.parameter_id for item in strat_param_link]
-    
+
     if not parameter_ids == allowed_parameter_ids:
         raise HTTPException(status_code=403, detail=f"Invalid parameter types for recipe with strategy: {recipe.strategy_id}")
-    
+
     # Checking if tool allows strategy
-    tool = db.query(models.Tool).filter_by(id = recipe.tool_id).first()
-    if not tool: 
+    tool = db.query(models.Tool).filter_by(id=recipe.tool_id).first()
+    if not tool:
         raise HTTPException(status_code=400, detail="Tool not found")
-    
-    link = db.query(models.ToolTypeStrategyLink).filter_by(tooltype_id = tool.tool_type_id, strategy_id = recipe.strategy_id).first()
+
+    link = db.query(models.ToolTypeStrategyLink).filter_by(tooltype_id=tool.tool_type_id, strategy_id=recipe.strategy_id).first()
     if not link:
         raise HTTPException(status_code=403, detail=f"Invalid tool for selected strategy: {recipe.strategy_id}")
-    
+
     # Checking if material exists
-    material = db.query(models.Material).filter_by(id = recipe.material_id).first()
-    if not material: raise HTTPException(status_code=400, detail="Material not found")
+    material = db.query(models.Material).filter_by(id=recipe.material_id).first()
+    if not material:
+        raise HTTPException(status_code=400, detail="Material not found")
 
     return True
-
-
 
 
 @router.get("/recipe_detail/{recipe_id}")
@@ -221,9 +216,12 @@ def get_recipe_detail(recipe_id: int, db: Session = Depends(get_db)):
     parameter_map = {}
     for v in values:
         param = db.query(models.RecipeParameter).filter_by(id=v.parameter_id).first()
-        if param.type == 'float': val = v.value_float
-        elif param.type == 'int': val = v.value_int
-        elif param.type == 'string': val = v.value_str
+        if param.type == 'float':
+            val = v.value_float
+        elif param.type == 'int':
+            val = v.value_int
+        elif param.type == 'string':
+            val = v.value_str
         parameter_map[param.name] = val
 
     return {

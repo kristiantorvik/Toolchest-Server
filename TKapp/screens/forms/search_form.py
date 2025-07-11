@@ -6,6 +6,7 @@ import tkinter.font as tkfont
 from helper_func import keybinds
 from screens.forms import edit_recipe_form
 
+
 def show_search_form(app):
     keybinds.unbind_all(app)
     app.operation_label.config(text="Search Recipe")
@@ -16,14 +17,14 @@ def show_search_form(app):
         app.show_home()
         app.set_status("No recipes in DB")
         return
-    
+
     stragegy_map = {t["name"]: t for t in strategies}
     strategy_keys = list(stragegy_map.keys())
 
     strategy_frame = tk.Frame(app.content_frame)
     strategy_frame.grid(row=0, column=0, sticky='NEW', padx=50, pady=10)
     tk.Label(strategy_frame, text="Strategy:").grid(row=0, column=0)
-    
+
     strategy_var = tk.StringVar()
     strategy_var.set(strategy_keys[0])
     strategy_dropdown = ttk.Combobox(strategy_frame, textvariable=strategy_var, state="readonly")
@@ -126,7 +127,7 @@ def show_search_form(app):
 
         all_parameters = fetch(f"recipe_parameters/by_strategy/{selected_strategy['id']}")
         all_param_keys = ([param["name"] for param in all_parameters])
-        
+
 
         for rid in recipe_ids:
             data = fetch(f"/recipe_detail/{rid}")
@@ -169,7 +170,7 @@ def show_search_form(app):
         if len(selected_rows) == 1:
             item_data = tree.item(selected_rows[0])  # Returns a dictionary of attributes for first item
             id = item_data["values"][0]
-            edit_recipe_form.show_edit_recipe_form(app, recipe_id = id)
+            edit_recipe_form.show_edit_recipe_form(app, recipe_id=id)
 
         elif len(selected_rows) > 1:
             app.set_status("Select only one entry to edit")
@@ -185,19 +186,20 @@ def show_search_form(app):
 
         if not recipes_to_delete:
             return
-        
+
         ok = messagebox.askokcancel("Confirm delete!", f"Permanently delete:{recipes_to_delete}\nThis cannot be undone")
         if not ok:
             return
 
-        for recipe_id in recipes_to_delete:      
-            print(recipe_id)      
+        for recipe_id in recipes_to_delete:
+            print(recipe_id)
             response = delete(f"/recipes/{recipe_id}")
 
             if response:
                 app.set_status(f"Deleted recipe {recipe_id}")
                 submit()
-            else: app.set_status(f"Error when deleting tool {recipe_id}")
+            else:
+                app.set_status(f"Error when deleting tool {recipe_id}")
 
 
     tk.Button(button_frame, text="Search", command=submit, width=15).grid(row=0, column=0, pady=5, sticky="W")
@@ -217,7 +219,7 @@ def show_search_form(app):
     tree.column("ID", anchor="w")
     tree.grid(row=0, column=1)
 
-    
+
     strategy_dropdown.bind("<<ComboboxSelected>>", populate_filters)
     populate_filters()
     keybinds.bind_key(app, "<Return>", submit)

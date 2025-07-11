@@ -2,8 +2,8 @@ from fastapi import Header, HTTPException, status
 import os
 
 
-
 API_KEY = os.environ["API_KEY"]
+
 
 def verify_api_key(x_api_key: str = Header(...)):
     if x_api_key != API_KEY:

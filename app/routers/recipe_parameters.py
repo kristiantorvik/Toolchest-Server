@@ -10,6 +10,7 @@ router = APIRouter(
     dependencies=[Depends(verify_api_key)]
 )
 
+
 @router.get("/recipe_parameters/")
 def get_recipe_parameters(db: Session = Depends(get_db)):
     parameters = db.query(models.RecipeParameter).all()
@@ -21,6 +22,7 @@ def get_recipe_parameters(db: Session = Depends(get_db)):
             "description": param.description
         } for param in parameters
     ]
+
 
 @router.post("/recipe_parameters/")
 def create_recipe_parameter(name: str, type: str, description: str, db: Session = Depends(get_db)):
@@ -40,6 +42,7 @@ def create_recipe_parameter(name: str, type: str, description: str, db: Session 
         "description": param.description
     }
 
+
 @router.delete("/recipe_parameters/{param_id}")
 def delete_recipe_parameter(param_id: int, db: Session = Depends(get_db)):
     param = db.query(models.RecipeParameter).filter_by(id=param_id).first()
@@ -49,7 +52,6 @@ def delete_recipe_parameter(param_id: int, db: Session = Depends(get_db)):
     db.delete(param)
     db.commit()
     return {"detail": "Deleted"}
-
 
 
 

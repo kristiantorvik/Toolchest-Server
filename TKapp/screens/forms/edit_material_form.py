@@ -2,6 +2,7 @@ import tkinter as tk
 from api import fetch, patch
 from helper_func import keybinds
 
+
 def show_edit_material_form(app, **kwargs):
     app.operation_label.config(text="Edit Material")
     app.clear_content()
@@ -22,7 +23,7 @@ def show_edit_material_form(app, **kwargs):
             print(f"Unknown error: {e}")
             clear_boxes()
             return
-        
+
         material = fetch(f"/materials/by_id/{id}")
         if not material:
             app.set_status(f"No material found with id {id}")
@@ -54,9 +55,7 @@ def show_edit_material_form(app, **kwargs):
     comment_entry = tk.Entry(app.content_frame, textvariable=material_comment)
     comment_entry.grid(row=2, column=1)
 
-
     material_id.trace_add(mode="write", callback=fetch_material)
-
 
 
 
@@ -76,7 +75,7 @@ def show_edit_material_form(app, **kwargs):
 
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=3, column=0, columnspan=2, pady=20)
     keybinds.bind_key(app, "<Return>", submit)
-    if 'material_id' in kwargs: name_entry.focus_set()
-    else: id_entry.focus_set()
-
-    
+    if 'material_id' in kwargs:
+        name_entry.focus_set()
+    else:
+        id_entry.focus_set()

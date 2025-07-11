@@ -3,13 +3,12 @@ from tkinter import ttk
 from api import fetch, patch
 from helper_func import keybinds, validate
 
+
 def show_edit_recipe_form(app, **kwargs):
     keybinds.unbind_all(app)
     app.operation_label.config(text="Edit Recipe")
     app.set_status("")
     app.clear_content()
-
-
 
     # Load materials, strategies and tool data
     materials = fetch("materials/")
@@ -70,15 +69,16 @@ def show_edit_recipe_form(app, **kwargs):
         if not recipe:
             clear_fields()
             return
-        
+
         if 'strategy_id' in kwargs:
             strategy_id = kwargs['strategy_id']
+            tool_var.set("")
         else:
             strategy_id = recipe["strategy_id"]
             strategy_var.set(recipe['strategy'])
+            tool_var.set(recipe['tool'])
 
 
-        tool_var.set(recipe['tool'])
         material_var.set(recipe['material'])
 
         used_param_keys = recipe["parameters"].keys()
@@ -93,7 +93,7 @@ def show_edit_recipe_form(app, **kwargs):
             return
         tool_menu["values"] = tool_keys
 
-        
+
         nonlocal tool_map
         tool_map = filtered_tool_map
 
@@ -108,26 +108,25 @@ def show_edit_recipe_form(app, **kwargs):
             pid = param["id"]
 
             label = tk.Label(app.content_frame, text=f"{pname} ({ptype}):")
-            label.grid(row=3+idx, column=0)
+            label.grid(row=3 + idx, column=0)
             entry = tk.Entry(app.content_frame)
-            entry.grid(row=3+idx, column=1)
+            entry.grid(row=3 + idx, column=1)
 
             if pname in used_param_keys:
                 value = recipe["parameters"][pname]
                 entry.insert(0, value)
-                
 
             dynamic_fields[pname] = {"label": label, "entry": entry, "type": ptype, "id": pid}
 
     def changed_strategy_update(*args):
         strategy_id = strategy_map[strategy_var.get()]["id"]
-        update_fields(strategy_id = strategy_id)
+        update_fields(strategy_id=strategy_id)
 
 
     recipe_id.trace_add(mode="write", callback=update_fields)
     strategy_var.trace_add(mode="write", callback=(changed_strategy_update))
 
-    
+
 
     def submit(*args):
         data = {
@@ -142,11 +141,12 @@ def show_edit_recipe_form(app, **kwargs):
             value = info["entry"].get().strip()
             ptype = info["type"]
             id = info["id"]
-    
-            if value == "": pass
+
+            if value == "":
+                pass
             else:
                 value, ok = validate.check_input(value, ptype)
-                if not ok: 
+                if not ok:
                     app.set_status("Invalid inputs")
                     return
 
@@ -161,7 +161,8 @@ def show_edit_recipe_form(app, **kwargs):
 
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=0, column=3, pady=20, padx=20)
 
-    if kwargs['recipe_id']: recipe_id.set(kwargs['recipe_id'])
+    if 'recipe_id' in kwargs:
+        recipe_id.set(kwargs['recipe_id'])
     keybinds.bind_key(app, "<Return>", submit)
-    material_menu.focus_set()
 
+    material_menu.focus_set()

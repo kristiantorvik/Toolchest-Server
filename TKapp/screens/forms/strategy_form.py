@@ -58,18 +58,16 @@ def show_strategy_form(app):
             "parameter_ids": selected_param_ids
         }
 
-        print(payload)
 
         response = post("/strategies/", payload)
         if response.status_code == 200:
             app.show_home()
             app.set_status("Strategy added successfully.")
         else:
-            messagebox.showerror("Error", f"Failed to add strategy: {response.status_code}")
+            app.set_status(f"Error: {response.status_code}")
 
     submit_btn = tk.Button(app.content_frame, text="Submit", command=submit)
     submit_btn.grid(row=99, column=0, columnspan=2, pady=10)
 
     keybinds.bind_key(app, "<Return>", submit)
     name_entry.focus_set()
-

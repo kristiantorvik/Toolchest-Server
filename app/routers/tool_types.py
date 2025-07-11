@@ -8,6 +8,7 @@ router = APIRouter(
     dependencies=[Depends(verify_api_key)]
 )
 
+
 @router.get("/tool_types/")
 def get_tool_types(db: Session = Depends(get_db)):
     tool_types = db.query(models.ToolType).all()
@@ -18,12 +19,13 @@ def get_tool_types(db: Session = Depends(get_db)):
         } for tool_type in tool_types
     ]
 
+
 @router.post("/tool_types/")
 def create_tool_type(tool_type_data: schemas.ToolTypeCreate, db: Session = Depends(get_db)):
     existing = db.query(models.ToolType).filter(models.ToolType.name == tool_type_data.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="Tool type already exists")
-    
+
     tool_type = models.ToolType(name=tool_type_data.name)
     db.add(tool_type)
     db.commit()
@@ -46,12 +48,13 @@ def create_tool_type(tool_type_data: schemas.ToolTypeCreate, db: Session = Depen
         "name": tool_type.name
     }
 
+
 @router.delete("/tool_types/{tool_type_id}")
 def delete_tool_type(tool_type_id: int, db: Session = Depends(get_db)):
     tool_type = db.query(models.ToolType).filter(models.ToolType.id == tool_type_id).first()
     if not tool_type:
         raise HTTPException(status_code=404, detail="Tool type not found")
-    
+
     db.delete(tool_type)
     db.commit()
 
