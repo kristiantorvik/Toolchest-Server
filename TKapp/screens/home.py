@@ -1,5 +1,5 @@
 import tkinter as tk
-from screens.forms import material_form, strategy_form, tooltype_form, tool_form, recipe_form, search_form, tool_search_form, edit_material_form, material_search_form, edit_tool_form, edit_recipe_form
+from screens.forms import material_form, strategy_form, tooltype_form, tool_form, recipe_form, search_form, tool_search_form, edit_material_form, material_search_form, edit_tool_form, edit_recipe_form, edit_tooltype_form
 from helper_func import keybinds
 
 
@@ -23,7 +23,7 @@ def show_home(app):
         ("Edit Material", lambda *args: edit_material_form.show_edit_material_form(app)),
         ("Edit Tool", lambda *args: edit_tool_form.show_edit_tool_form(app)),
         ("Edit Recipe", lambda *args: edit_recipe_form.show_edit_recipe_form(app)),
-        ("Edit Tool Type", lambda *args: tooltype_form.show_tooltype_form(app)),
+        ("Edit Tool Type", lambda *args: edit_tooltype_form.show_edit_tooltype_form(app)),
         ("Edit Strategy", lambda *args: strategy_form.show_strategy_form(app)),
     ]
 

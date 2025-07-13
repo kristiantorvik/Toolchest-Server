@@ -5,6 +5,7 @@ from api import fetch, post, delete
 import tkinter.font as tkfont
 from helper_func import keybinds
 from screens.forms import edit_recipe_form
+from screens.forms import recipe_from_old_form
 
 
 def show_search_form(app):
@@ -201,6 +202,18 @@ def show_search_form(app):
             else:
                 app.set_status(f"Error when deleting tool {recipe_id}")
 
+    def create_new():
+        selected_rows = tree.selection()  # Returns a tuple of selected item IDs
+        if len(selected_rows) == 1:
+            item_data = tree.item(selected_rows[0])  # Returns a dictionary of attributes for first item
+            id = item_data["values"][0]
+            recipe_from_old_form.show_recipe_from_old(app, recipe_id=id)
+
+        elif len(selected_rows) > 1:
+            app.set_status("Select only one to create new")
+            return
+
+
 
     tk.Button(button_frame, text="Search", command=submit, width=15).grid(row=0, column=0, pady=5, sticky="W")
     tk.Label(button_frame, text="Enter").grid(row=0, column=1, sticky="W")
@@ -208,6 +221,8 @@ def show_search_form(app):
     tk.Label(button_frame, text="E").grid(row=1, column=1, sticky="W")
     tk.Button(button_frame, text="Delete", command=delete_selected_recipe, width=15).grid(row=2, column=0, pady=5, sticky="W")
     tk.Label(button_frame, text="Backspace").grid(row=2, column=1, sticky="W")
+    tk.Button(button_frame, text="Create new\n from selected", command=create_new, width=15).grid(row=3, column=0, pady=5, sticky="W")
+    tk.Label(button_frame, text="C").grid(row=3, column=1, sticky="W")
 
 
     tree = ttk.Treeview(treeview_frame, columns=("ID",), show='headings')
@@ -227,6 +242,7 @@ def show_search_form(app):
     tree.bind("<BackSpace>", delete_selected_recipe)
     tree.bind("<Delete>", delete_selected_recipe)
     tree.bind("d", delete_selected_recipe)
+    tree.bind("c", create_new)
 
 
     keybinds.bind_key(app, "<Return>", submit)

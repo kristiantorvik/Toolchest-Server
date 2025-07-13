@@ -121,6 +121,14 @@ class ToolTypeRead(ToolTypeBase):
     id: int
 
 
+class ToolTypePatch(BaseModel):
+    id: int
+    name: str
+    tool_parameter_ids: List[int]
+    strategy_ids: List[int]
+    force: bool
+
+
 # ------------------- Strategies -------------------
 class StrategyBase(BaseModel):
     name: str
