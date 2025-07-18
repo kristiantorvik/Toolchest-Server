@@ -38,17 +38,23 @@ class ToolChestApp:
         self.info_button = tk.Button(self.top_frame, text="info", command=self.show_info)
         self.info_button.pack(side=tk.RIGHT, padx=10)
 
-        self.content_frame = tk.Frame(self.root)
-        self.content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        self.create_content_frame()
 
         self.status_frame = tk.Frame(self.root, bg="#ddd", height=30)
         self.status_frame.pack(fill=tk.X)
         self.status_label = tk.Label(self.status_frame, text="", bg="#ddd", fg="black", font=("Arial", 10))
         self.status_label.pack(side=tk.LEFT, padx=10)
 
+
+    def create_content_frame(self):
+        self.content_frame = tk.Frame(self.root)
+        self.content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+
+
     def clear_content(self):
-        for widget in self.content_frame.winfo_children():
-            widget.destroy()
+        self.content_frame.destroy()
+        self.create_content_frame()
+
 
     def show_home(self, *args):
         self.operation_label.config(text="Home")

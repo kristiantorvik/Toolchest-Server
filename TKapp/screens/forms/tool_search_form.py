@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from api import fetch, post, delete
 import tkinter.font as tkfont
-from helper_func import keybinds
+from helper_func import keybinds, SmartTree
 from screens.forms import edit_tool_form
 
 
