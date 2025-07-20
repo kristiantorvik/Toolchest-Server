@@ -1,9 +1,7 @@
 import tkinter as tk
-from tkinter import ttk
 from tkinter import messagebox
 from api import fetch, delete
-import tkinter.font as tkfont
-from helper_func import keybinds
+from helper_func import keybinds, SmartTree
 from screens.forms import edit_material_form
 
 
@@ -17,20 +15,12 @@ def show_material_search_form(app):
     button_frame.grid(row=0, column=0)
 
 
-    treeview_frame = tk.Frame(app.content_frame)
-    treeview_frame.grid(row=1, column=0, sticky='NW', padx=5, pady=5)
-
-
-    def empty_treeview():
-        for row in tree.get_children():
-            tree.delete(row)
-        tree["columns"] = ()
-        tree["show"] = "headings"
-        for col in tree["columns"]:
-            tree.heading(col, text="")
+    tree = SmartTree(app.content_frame)
+    tree.grid(row=1, column=0, sticky='NW', padx=5, pady=5)
 
 
     def get_materials(*args):
+        tree.empty()
 
         materials = fetch("/materials/")
         if not materials:
@@ -38,35 +28,10 @@ def show_material_search_form(app):
             app.set_status("Found no materials in DB")
             return
 
-        empty_treeview()
         columns = ["id", "name", "comment"]
 
-        # Set columns & headings
-        tree["columns"] = columns
-        for col in columns:
-            tree.heading(col, text=col.title())
+        tree.write(materials, columns=columns)
 
-        # Insert rows
-        for material in materials:
-            tree.insert("", "end", values=(material["id"], material["name"], material["comment"]))
-
-
-        # auto resice columns
-        tree.grid_remove()
-        tree.grid(row=0, column=1)
-        for col in columns:
-            max_width = tkfont.Font().measure(col)
-            for item in tree.get_children():
-                cell = str(tree.set(item, col))
-                cell_width = tkfont.Font().measure(cell)
-                if cell_width > max_width:
-                    max_width = cell_width
-            tree.column(column=col, width=max_width + 10, stretch=False)
-
-
-
-    tree = ttk.Treeview(treeview_frame, show='headings')
-    tree.grid(row=0, column=1)
 
     def edit_selected_material(*args):
         selected_rows = tree.selection()  # Returns a tuple of selected item IDs

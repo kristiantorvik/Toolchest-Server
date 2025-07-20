@@ -1,3 +1,4 @@
+import platform
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkfont
@@ -92,6 +93,10 @@ class SmartTree(tk.Frame):
         return self.tree.selection()
 
 
+    def item(self, *args, **kwargs):
+        return self.tree.item(*args, **kwargs)
+
+
     def get_selected(self):
         """Returns the values of the selected row as a dict"""
         selected = self.tree.selection()
@@ -162,3 +167,45 @@ class SmartTree(tk.Frame):
         self.tree["show"] = "headings"
         for col in self.tree["columns"]:
             self.tree.heading(col, text="")
+
+
+class ScrollableFrame(ttk.Frame):
+    '''Cutom frame/canvas that applies a scrollwheel binding to all children'''
+
+    def __init__(self, container, *args, **kwargs):
+        super().__init__(container, *args, **kwargs)
+
+        self.canvas = tk.Canvas(self)
+        self.scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.canvas)
+
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(
+                scrollregion=self.canvas.bbox("all")
+            )
+        )
+
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
+
+        self.canvas.grid(row=0, column=0, sticky="nsew")
+        self.scrollbar.grid(row=0, column=1, sticky="ns")
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self._bind_mousewheel()
+
+    def _bind_mousewheel(self):
+        # Bind mousewheel to all widgets inside scrollable_frame
+        def on_mousewheel(event):
+            self.canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+        widgets_to_bind = [self.scrollable_frame, self.canvas]
+        for widget in widgets_to_bind:
+            widget.bind_all("<MouseWheel>", on_mousewheel)
+            widget.bind_all("<Button-4>", lambda e: self.canvas.yview_scroll(-1, "units"))  # Linux
+            widget.bind_all("<Button-5>", lambda e: self.canvas.yview_scroll(1, "units"))   # Linux
+
+        # Clean-up: remove bindings when widget is destroyed
+        self.bind("<Destroy>", lambda e: self.unbind_all("<MouseWheel>"))

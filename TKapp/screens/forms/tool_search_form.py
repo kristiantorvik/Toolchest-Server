@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from api import fetch, post, delete
-import tkinter.font as tkfont
 from helper_func import keybinds, SmartTree
 from screens.forms import edit_tool_form
 
@@ -34,10 +33,14 @@ def show_tool_search_form(app):
     tool_type_dropdown['values'] = tool_type_keys
 
     filter_frame = tk.Frame(app.content_frame)
-    filter_frame.grid(row=1, column=0)
+    filter_frame.grid(row=1, column=0, sticky="W")
 
     button_frame = tk.Frame(app.content_frame, padx=20)
-    button_frame.grid(row=0, column=1, rowspan=2)
+    button_frame.grid(row=0, column=1, rowspan=2, sticky="W")
+
+    tree = SmartTree(app.content_frame)
+    tree.grid(row=2, column=0, sticky='NW', padx=5, pady=5, columnspan=3)
+    app.content_frame.columnconfigure(2, weight=1)
 
 
     # Dynamic parameter fields
@@ -64,11 +67,6 @@ def show_tool_search_form(app):
         submit()
 
 
-
-    # treeview_frame = tk.Frame(app.content_frame, width=1)
-    treeview_frame = tk.Frame(app.content_frame)
-
-    treeview_frame.grid(row=2, column=0, sticky='NW', padx=5, pady=5, columnspan=2)
 
 
     def get_filters():
@@ -97,14 +95,6 @@ def show_tool_search_form(app):
         return filters
 
 
-    def empty_treeview():
-        for row in tree.get_children():
-            tree.delete(row)
-        tree["columns"] = ()
-        tree["show"] = "headings"
-        for col in tree["columns"]:
-            tree.heading(col, text="")
-
 
     def get_tool_data(tool_type_id, tool_ids):
         tool_details = []
@@ -113,11 +103,14 @@ def show_tool_search_form(app):
         all_parameters = fetch(f"tool_parameters/by_tooltype/{tool_type_id}")
         all_param_keys = ([param["name"] for param in all_parameters])
 
-
         for tid in tool_ids:
             data = fetch(f"/tool_detail/{tid}")
-            tool_details.append(data)
             used_param_keys.update(data["parameters"].keys())
+
+            if "parameters" in data:
+                data.update(data.pop("parameters"))
+
+            tool_details.append(data)
 
         used_param_keys = [name for name in all_param_keys if name in used_param_keys]
         return used_param_keys, tool_details
@@ -134,50 +127,12 @@ def show_tool_search_form(app):
         else:
             app.set_status(f"Found {len(tool_ids)} matching tools")
 
-        empty_treeview()
         selected_tooltype = tool_type_map[tool_type_var.get()]
         used_param_keys, tool_details = get_tool_data(selected_tooltype['id'], tool_ids)
 
         columns = ["id", "name"] + (used_param_keys)
 
-        # Set columns & headings
-        tree["columns"] = columns
-        for col in columns:
-            tree.heading(col, text=col.replace("_", " ").title())
-
-        # Insert rows
-        for data in tool_details:
-            row = [data["id"], data["name"]]
-            row += [data["parameters"].get(k, "") for k in (used_param_keys)]
-            tree.insert("", tk.END, values=row)
-
-
-        # auto resice columns
-        tree.grid_remove()
-        tree.grid(row=0, column=1)
-        for col in columns:
-            max_width = tkfont.Font().measure(col)
-            for item in tree.get_children():
-                cell = str(tree.set(item, col))
-                cell_width = tkfont.Font().measure(cell)
-                if cell_width > max_width:
-                    max_width = cell_width
-            tree.column(column=col, width=max_width + 10, stretch=False)
-
-
-    # strategies = fetch("/strategies/")
-    # strategy_dropdown['values'] = [f"{s['id']}: {s['name']}" for s in strategies]
-    # strategy_dropdown.bind("<<ComboboxSelected>>", populate_filters)
-
-
-    tree = ttk.Treeview(treeview_frame, columns=("ID",), show='headings')
-    # scrollbar = ttk.Scrollbar(treeview_frame, orient="vertical", command=tree.yview)
-    # tree.configure(yscrollcommand=scrollbar.set)
-    # scrollbar.grid(row=0, column=0)
-    tree['columns'] = ("ID",)
-    tree.heading("ID", text="Recipe ID")
-    tree.column("ID", anchor="w")
-    tree.grid(row=0, column=1)
+        tree.write(tool_details, columns=columns)
 
     def edit_selected_tool(*args):
         selected_rows = tree.selection()  # Returns a tuple of selected item IDs
@@ -224,12 +179,12 @@ def show_tool_search_form(app):
 
 
 
-    tk.Button(button_frame, text="Search", command=submit, width=15).grid(row=0, column=0, pady=5)
-    tk.Label(button_frame, text="Enter").grid(row=0, column=1)
-    tk.Button(button_frame, text="Edit", command=edit_selected_tool, width=15).grid(row=1, column=0, pady=5)
-    tk.Label(button_frame, text="E").grid(row=1, column=1)
-    tk.Button(button_frame, text="Delete", command=delete_selected_tool, width=15).grid(row=2, column=0, pady=5)
-    tk.Label(button_frame, text="Backspace").grid(row=2, column=1)
+    tk.Button(button_frame, text="Search", command=submit, width=15).grid(row=0, column=0, pady=5, sticky="W")
+    tk.Label(button_frame, text="Enter").grid(row=0, column=1, sticky="W")
+    tk.Button(button_frame, text="Edit", command=edit_selected_tool, width=15).grid(row=1, column=0, pady=5, sticky="W")
+    tk.Label(button_frame, text="E").grid(row=1, column=1, sticky="W")
+    tk.Button(button_frame, text="Delete", command=delete_selected_tool, width=15).grid(row=2, column=0, pady=5, sticky="W")
+    tk.Label(button_frame, text="Backspace").grid(row=2, column=1, sticky="W")
 
 
     tool_type_dropdown.bind("<<ComboboxSelected>>", update_fields)

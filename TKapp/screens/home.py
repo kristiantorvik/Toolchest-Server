@@ -5,6 +5,10 @@ from helper_func import keybinds
 
 def show_home(app):
     keybinds.unbind_all(app)
+    keybinds.bind_key(app, "q", app.kill_bill)
+    keybinds.bind_key(app, "Q", app.kill_bill)
+
+
     add_buttons = [
         ("Add Material", lambda *args: material_form.show_material_form(app)),
         ("Add Tool Type", lambda *args: tooltype_form.show_tooltype_form(app)),
