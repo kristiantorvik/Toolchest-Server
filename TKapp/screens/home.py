@@ -7,6 +7,9 @@ def show_home(app):
     keybinds.unbind_all(app)
     keybinds.bind_key(app, "q", app.kill_bill)
     keybinds.bind_key(app, "Q", app.kill_bill)
+    app.content_frame.columnconfigure(0, weight=1)
+    app.content_frame.columnconfigure(1, weight=1)
+    app.content_frame.columnconfigure(2, weight=1)
 
 
     add_buttons = [

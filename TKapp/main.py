@@ -1,4 +1,5 @@
 import ctypes
+import ttkbootstrap as ttk
 import tkinter as tk
 from screens import home, info
 from helper_func import keybinds
@@ -35,10 +36,10 @@ class ToolChestApp:
         self.operation_label = tk.Label(self.top_frame, text="Home", bg="#222", fg="lightgray", font=("Arial", 12))
         self.operation_label.grid(row=0, column=1, padx=5, pady=10, sticky="w")
 
-        self.info_button = tk.Button(self.top_frame, text="Info", command=self.show_info)
+        self.info_button = ttk.Button(self.top_frame, text="Info", command=self.show_info, bootstyle="outline")
         self.info_button.grid(row=0, column=2, padx=5, pady=10, sticky="e")
 
-        self.home_button = tk.Button(self.top_frame, text="Home", command=self.show_home)
+        self.home_button = ttk.Button(self.top_frame, text="Home", command=self.show_home, bootstyle="outline")
         self.home_button.grid(row=0, column=3, padx=(0, 10), pady=10, sticky="e")
 
         # Status bar
@@ -104,6 +105,6 @@ class ToolChestApp:
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = ttk.Window(themename="superhero")
     app = ToolChestApp(root)
     root.mainloop()

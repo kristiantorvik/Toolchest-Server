@@ -113,7 +113,6 @@ def show_recipe_form(app):
                     return
 
             data["parameters"][id] = value
-        print(data)
         response = post("/recipes/", data)
         if response.status_code == 200:
             app.show_home()

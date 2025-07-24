@@ -1,4 +1,3 @@
-import platform
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkfont
@@ -57,7 +56,7 @@ class SmartTree(tk.Frame):
         super().__init__(parent, *args, **kwargs)
 
         self.tree = ttk.Treeview(self, show="headings")
-        self.scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview)
+        self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscrollcommand=self.scrollbar.set)
         self.scrollbar.grid(row=0, column=1, sticky="NS")
         self.tree.grid(row=0, column=0)
