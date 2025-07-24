@@ -3,7 +3,7 @@ FROM python:3.11-slim
 
 # Set environment
 ENV PYTHONUNBUFFERED=1
-WORKDIR /app
+WORKDIR /
 
 # Install Python dependencies
 COPY requirements.txt ./
@@ -15,6 +15,6 @@ COPY . .
 EXPOSE 8000
 
 # Run FastAPI with Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 VOLUME [ "/data" ]

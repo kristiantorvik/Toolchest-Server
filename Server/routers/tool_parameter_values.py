@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import models
-from ..db import get_db
-from ..auth import verify_api_key
+import models
+from db import get_db
+from auth import verify_api_key
 
 router = APIRouter(
     dependencies=[Depends(verify_api_key)]

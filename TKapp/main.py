@@ -20,7 +20,7 @@ class ToolChestApp:
         root.bind("<Escape>", self.show_home)
 
         try:
-            root.iconbitmap("TKapp/ICON.ico")
+            root.iconbitmap("ICON.ico")
         except tk.TclError:
             print("Icon file not found or invalid format.")
 

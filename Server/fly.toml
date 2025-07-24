@@ -23,4 +23,4 @@ primary_region = 'fra'
 
 [mounts]
   source = "toolchest_data"
-  destination = "/app/data"
+  destination = "/data"

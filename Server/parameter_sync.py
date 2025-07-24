@@ -1,6 +1,6 @@
 import yaml
 from sqlalchemy.orm import Session
-from .models import ToolParameter, RecipeParameter
+from models import ToolParameter, RecipeParameter
 
 
 def sync_parameters_from_config(tool_param_path: str, recipe_param_path: str, db: Session):

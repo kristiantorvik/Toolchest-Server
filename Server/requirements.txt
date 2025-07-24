@@ -1,9 +1,7 @@
 # requirements.txt
+# For the Server
 fastapi
 uvicorn[standard]
 sqlalchemy
 pydantic
-requests
 python-dotenv
-pillow
-ttkbootstrap

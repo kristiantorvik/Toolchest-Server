@@ -1,4 +1,5 @@
-venv/
+venv_TKapp/
+venv_Server/
 __pycache__/
 *.pyc
 *.pyo

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..models import Material
-from ..db import get_db
-from .. import schemas
-from ..auth import verify_api_key
+from models import Material
+from db import get_db
+import schemas
+from auth import verify_api_key
 
 router = APIRouter(
     prefix="/materials",

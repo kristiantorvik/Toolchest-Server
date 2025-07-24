@@ -1,7 +1,7 @@
 import yaml
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.models import Base, ToolParameter, RecipeParameter
+from models import Base, ToolParameter, RecipeParameter
 
 
 # Load YAML configs
@@ -12,7 +12,7 @@ def load_yaml(filename):
 
 def sync_parameters(session):
     # --- Tool Parameters ---
-    tool_params = load_yaml("app/tool_parameter_config.yaml")
+    tool_params = load_yaml("tool_parameter_config.yaml")
     for param in tool_params['tool_parameters']:
         existing = session.query(ToolParameter).filter_by(name=param['name']).first()
         if not existing:
@@ -25,7 +25,7 @@ def sync_parameters(session):
             print(f"Added tool parameter: {param['name']}")
 
     # --- Recipe Parameters ---
-    recipe_params = load_yaml("app/recipe_parameter_config.yaml")
+    recipe_params = load_yaml("recipe_parameter_config.yaml")
     for param in recipe_params['recipe_parameters']:
         existing = session.query(RecipeParameter).filter_by(name=param['name']).first()
         if not existing:

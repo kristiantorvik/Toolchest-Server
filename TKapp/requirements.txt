@@ -1,0 +1,5 @@
+# requirements.txt
+# For the TKapplication frontend
+requests
+pillow
+ttkbootstrap
