@@ -1,12 +1,15 @@
-# Toolchest-Server
+<div style="display: flex; align-items: center; justify-content: space-between;">
+  <h1 style="margin: 30px;">Toolchest-Server</h1>
+  <img src="ICON.png" alt="Alt Text" style="margin-right: 50px; margin-bottom: 15px; width: 120px;">
+</div>
 
-An attempt to create a storage bank for manufacturing process recipies.
+A storage bank for manufacturing process recipies with configurable and dynamic parameters.
 
-SQLite server with TKinter application front-end 
+The Server is a fast SQLite server with TKinter application front-end
 
 The server can be run locally or hosted with Fly.io or similar using docker
 
-The Tkinter application can be built to an .EXE with pyinstaller
+The Tkinter application can be built to an .EXE with pyinstaller for easy setup
 
 The server lies under /Server and the frontend application under /TKapp
 

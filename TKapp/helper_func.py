@@ -55,7 +55,7 @@ class SmartTree(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
-        self.tree = ttk.Treeview(self, show="headings")
+        self.tree = ttk.Treeview(self, show="headings", bootstyle='primary')
         self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview)
         self.tree.configure(yscrollcommand=self.scrollbar.set)
         self.scrollbar.grid(row=0, column=1, sticky="NS")

@@ -32,4 +32,3 @@ def patch(endpoint, data):
     headers = {"x-api-key": API_KEY, 'Content-Type': 'application/json'}
     response = requests.patch(f"{API_URL}/{endpoint}", json=data, headers=headers)
     return response
-

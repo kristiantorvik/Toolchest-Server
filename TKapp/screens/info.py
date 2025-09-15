@@ -1,4 +1,3 @@
-import os
 import tkinter as tk
 from PIL import Image, ImageTk
 from helper_func import ScrollableFrame, keybinds
@@ -19,7 +18,7 @@ def show_info(app):
 
     # Load icon
     try:
-        icon_path = os.path.join("TKapp", "ICON.png")
+        icon_path = "ICON.png"
         icon_img = Image.open(icon_path).resize((128, 128), Image.Resampling.LANCZOS)
         icon = ImageTk.PhotoImage(icon_img)
         icon_label = tk.Label(content, image=icon)

@@ -116,6 +116,7 @@ def show_search_form(app):
 
         if not recipe_ids:
             app.set_status("Found no matching recipe in DB")
+            return
         else:
             app.set_status(f"Found {len(recipe_ids)} matching recipes")
 
