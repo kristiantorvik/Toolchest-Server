@@ -105,6 +105,13 @@ def show_edit_tooltype_form(app, **kwargs):
         else:
             app.set_status(f"Error: {response.status_code}")
 
+
+
+    if 'tooltype_id' in kwargs:
+        id_var.set(kwargs['tooltype_id'])
+        update_listbox()
+
+
     id_var.trace("w", update_listbox)
     tk.Button(app.content_frame, text="Submit", command=submit).grid(row=3, column=0, columnspan=2, pady=20)
     keybinds.bind_key(app, "<Return>", submit)

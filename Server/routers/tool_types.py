@@ -50,7 +50,7 @@ def create_tool_type(tool_type_data: schemas.ToolTypeCreate, db: Session = Depen
     }
 
 
-@router.delete("/tool_types/{tool_type_id}")
+@router.delete("/tooltypes/{tool_type_id}")
 def delete_tool_type(tool_type_id: int, db: Session = Depends(get_db)):
     tool_type = db.query(models.ToolType).filter(models.ToolType.id == tool_type_id).first()
     if not tool_type:
